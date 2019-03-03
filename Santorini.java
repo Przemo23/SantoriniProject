@@ -7,6 +7,8 @@ import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 
+
+
 import com.jme3.scene.Geometry;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.Spatial;
@@ -14,13 +16,9 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.FastMath;
 import com.jme3.scene.Node;
 import com.jme3.input.KeyInput;
-import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
-import com.jme3.input.controls.MouseButtonTrigger;
-import com.jme3.util.SkyFactory;
-import com.jme3.water.SimpleWaterProcessor;
 
 /**
  * This is the Main Class of your Game. You should only do initialization here.
@@ -45,16 +43,21 @@ public class Santorini extends SimpleApplication {
        
     }
     PlayerClass Player1 = new PlayerClass();
+    float Timer =0.0f;
+    
+    MapTile MapTiles[][]=new MapTile[5][5];
+    
     
             @Override
     public void simpleInitApp() {
            
+       
         Node FloorNode = new Node("Floor");
         rootNode.attachChild(FloorNode);
-        Node WaterNode = new Node("Water");
-        WaterNode.attachChild(WaterNode);
+        //Node WaterNode = new Node("Water");
+       // WaterNode.attachChild(WaterNode);
                 
-        
+        /*
         Spatial TestBlock = assetManager.loadModel("Models/Parter.j3o");
   
         FloorNode.attachChild(TestBlock);
@@ -74,7 +77,7 @@ public class Santorini extends SimpleApplication {
         Spatial Dome = assetManager.loadModel("Models/Dome.j3o");
         FloorNode.attachChild(Dome);
         Dome.setLocalTranslation(-52.0f,61.0f,-52.0f);
-        Dome.setLocalScale(6.0f);
+        Dome.setLocalScale(6.0f);*/
         
         
         Spatial Board = assetManager.loadModel("Models/Board.j3o");
@@ -93,32 +96,19 @@ public class Santorini extends SimpleApplication {
         Player1.Player.setMaterial(PlayerMat);
         Player1.Player.setLocalTranslation(-13.0f,43.6f,-13.0f);
         FloorNode.attachChild(Player1.Player);
-        //Tiles
-        Box FloorTileShape = new Box(10.0f,0.1f,10.0f);
-        Spatial[][] FloorTiles = new Spatial[5][5];
         
-        for(byte i=0;i<5;i++)
+
+        //Tiles
+        for(byte i=0;i<5;i++) // Initializing 
         {
             for(byte j=0;j<5;j++)
             {
-                //Material and shape
-                Spatial FloorTile = new Geometry("Tile",FloorTileShape);
-                Material TileMat = new Material(
-                         assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-                //TileMat.setColor("Color", ColorRGBA.randomColor());
-                if((j-i)%2==0)
-                    TileMat.setColor("Color",ColorRGBA.White);
-                else
-                    TileMat.setColor("Color",ColorRGBA.Black);
-                FloorTile.setMaterial(TileMat);
+                MapTiles[i][j] = new MapTile(assetManager,i,j);
+                FloorNode.attachChild(MapTiles[i][j].TileNode);
                
-       
-                //Location
-                FloorTile.setLocalTranslation(-53.0f + 20*i,40.0f,-53.0f +20*j);
-                FloorTiles[i][j] = FloorTile;
-                FloorNode.attachChild(FloorTiles[i][j]);
             }
         }
+      
         
         // Terrain
         Terrain = assetManager.loadModel("Scenes/Map1.j3o");
@@ -133,12 +123,26 @@ public class Santorini extends SimpleApplication {
         
         
         
+        //Testing segment
+        MapTiles[0][1].BuildUp();
+        MapTiles[0][1].BuildUp();
+        MapTiles[0][1].BuildUp();
+        MapTiles[1][2].BuildUp();
+        MapTiles[1][2].BuildUp();
+        MapTiles[1][2].BuildUp();
+        MapTiles[1][2].BuildUp();
+        MapTiles[1][2].BuildUp();
+        MapTiles[3][0].BuildUp();
+        MapTiles[3][0].BuildUp();
+        MapTiles[2][4].BuildUp();
         
         
+        //End of tests
         DirectionalLight sun = new DirectionalLight();
           sun.setDirection(new Vector3f(1,0,-2).normalizeLocal());
           sun.setColor(ColorRGBA.White);
         rootNode.addLight(sun);
+        initKeys();
         
         
     }
@@ -147,11 +151,11 @@ public class Santorini extends SimpleApplication {
         inputManager.addMapping("Pause",  new KeyTrigger(KeyInput.KEY_P));
         inputManager.addMapping("Left",   new KeyTrigger(KeyInput.KEY_J));
         inputManager.addMapping("Right",  new KeyTrigger(KeyInput.KEY_K));
-        inputManager.addMapping("Rotate", new KeyTrigger(KeyInput.KEY_SPACE),
-                                          new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+        inputManager.addMapping("Up",     new KeyTrigger(KeyInput.KEY_I));
+        inputManager.addMapping("Down",   new KeyTrigger(KeyInput.KEY_M));
         // Add the names to the action listener.
         inputManager.addListener(actionListener, "Pause");
-        inputManager.addListener(analogListener, "Left", "Right", "Rotate");
+        inputManager.addListener(analogListener, "Left", "Right", "Up","Down");
 
     }
 
@@ -167,24 +171,33 @@ public class Santorini extends SimpleApplication {
     private final AnalogListener analogListener = new AnalogListener() {
         @Override
         public void onAnalog(String name, float value, float tpf) {
-            if (isRunning) {
-                if (name.equals("Up")) {
-                    Player1.Player.rotate(0, value * speed, 0);
+            
+            
+            if(Timer > 0.5f)
+            {
+                if (isRunning) {
+                    if (name.equals("Up")) {
+                        Vector3f v = Player1.Player.getLocalTranslation();
+                        Player1.Player.setLocalTranslation(v.x , v.y , v.z + 20.0f);           
+                    }
+                    if (name.equals("Right")) {
+                        Vector3f v = Player1.Player.getLocalTranslation();
+                        Player1.Player.setLocalTranslation(v.x + 20.0f, v.y, v.z);
+                    }
+                    if (name.equals("Left")) {
+                        Vector3f v = Player1.Player.getLocalTranslation();
+                        Player1.Player.setLocalTranslation(v.x - 20.0f, v.y, v.z);
+                    }
+                    if (name.equals("Down")) {
+                        Vector3f v = Player1.Player.getLocalTranslation();
+                        Player1.Player.setLocalTranslation(v.x , v.y, v.z-20.0f);
+                    }
+                    Timer = 0.0f;
+               
+                    //isRunning = false;
+                } else {
+                    System.out.println("Press P to unpause.");
                 }
-                if (name.equals("Right")) {
-                    Vector3f v = Player1.Player.getLocalTranslation();
-                    Player1.Player.setLocalTranslation(v.x + value * speed, v.y, v.z);
-                }
-                if (name.equals("Left")) {
-                    Vector3f v = Player1.Player.getLocalTranslation();
-                    Player1.Player.setLocalTranslation(v.x - value * speed, v.y, v.z);
-                }
-                if (name.equals("Left")) {
-                    Vector3f v = Player1.Player.getLocalTranslation();
-                    Player1.Player.setLocalTranslation(v.x - value * speed, v.y, v.z);
-                }
-            } else {
-                System.out.println("Press P to unpause.");
             }
         }
     };
@@ -217,7 +230,7 @@ rootNode.attachChild(water);
     */
     @Override
     public void simpleUpdate(float tpf) {
-        //TODO: add update code
+        Timer += tpf;//*settings.getFrameRate();
     }
 
   
