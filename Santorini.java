@@ -2,15 +2,12 @@ package mygame;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.light.DirectionalLight;
-import com.jme3.material.Material;
 
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 
 
 
-import com.jme3.scene.Geometry;
-import com.jme3.scene.shape.Box;
 import com.jme3.scene.Spatial;
 import com.jme3.math.Quaternion;
 import com.jme3.math.FastMath;
@@ -35,14 +32,9 @@ public class Santorini extends SimpleApplication {
     Spatial Terrain;
     
 
-    protected class PlayerClass
-    {
-        public PlayerClass(){};
-        Spatial Player;
-        byte XTile,YTile;
-       
-    }
-    PlayerClass Player1 = new PlayerClass();
+    
+    Player Player1,Player2;
+   
     float Timer =0.0f;
     
     MapTile MapTiles[][]=new MapTile[5][5];
@@ -56,47 +48,13 @@ public class Santorini extends SimpleApplication {
         rootNode.attachChild(FloorNode);
         //Node WaterNode = new Node("Water");
        // WaterNode.attachChild(WaterNode);
-                
-        /*
-        Spatial TestBlock = assetManager.loadModel("Models/Parter.j3o");
-  
-        FloorNode.attachChild(TestBlock);
-        TestBlock.setLocalTranslation(-52.0f,40.0f,-52.0f);
-        TestBlock.setLocalScale(3.0f);
-        Spatial TestBlock2 = assetManager.loadModel("Models/Second.j3o");
-
-        FloorNode.attachChild(TestBlock2);
-        TestBlock2.setLocalTranslation(-52.0f,57.2f,-52.0f);
-        TestBlock2.setLocalScale(3.0f);
-        
-        Spatial TestBlock3 = assetManager.loadModel("Models/Pierwsze.j3o");
-        FloorNode.attachChild(TestBlock3);
-        TestBlock3.setLocalTranslation(-52.0f,46.0f,-52.0f);
-        TestBlock3.setLocalScale(3.0f);
-        
-        Spatial Dome = assetManager.loadModel("Models/Dome.j3o");
-        FloorNode.attachChild(Dome);
-        Dome.setLocalTranslation(-52.0f,61.0f,-52.0f);
-        Dome.setLocalScale(6.0f);*/
+               
         
         
         Spatial Board = assetManager.loadModel("Models/Board.j3o");
         Board.setLocalTranslation(-23.0f, 40.1f, -3.0f);
         Board.setLocalScale(20.0f);
         FloorNode.attachChild(Board);
-        
-        
-        // Prototype player
-        
-        Box PlayerShape = new Box(1.2f,3.6f,1.2f);
-        Player1.Player = new Geometry("Player",PlayerShape);
-        Material PlayerMat = new Material(
-                         assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        PlayerMat.setColor("Color", ColorRGBA.Blue);
-        Player1.Player.setMaterial(PlayerMat);
-        Player1.Player.setLocalTranslation(-13.0f,43.6f,-13.0f);
-        FloorNode.attachChild(Player1.Player);
-        
 
         //Tiles
         for(byte i=0;i<5;i++) // Initializing 
@@ -108,7 +66,17 @@ public class Santorini extends SimpleApplication {
                
             }
         }
-      
+        
+        //Players
+        Player1 = new Player(assetManager,(byte)2,(byte)2);
+        Player2 = new Player(assetManager,(byte)3,(byte)1);
+        MapTiles[2][2].IsBuilder = MapTiles[3][1].IsBuilder =  true;
+        Player1.isActive = true;
+        Player2.isActive = false;
+        
+        
+        FloorNode.attachChild(Player1.PlayerModel);
+        FloorNode.attachChild(Player2.PlayerModel);
         
         // Terrain
         Terrain = assetManager.loadModel("Scenes/Map1.j3o");
@@ -119,9 +87,6 @@ public class Santorini extends SimpleApplication {
                Quaternion Rot = new Quaternion();
                Rot.fromAngleAxis(FastMath.PI/8, new Vector3f(1f,-1f,0f));
                  FloorNode.setLocalRotation(Rot);
-        
-        
-        
         
         //Testing segment
         MapTiles[0][1].BuildUp();
@@ -135,6 +100,11 @@ public class Santorini extends SimpleApplication {
         MapTiles[3][0].BuildUp();
         MapTiles[3][0].BuildUp();
         MapTiles[2][4].BuildUp();
+        MapTiles[3][4].BuildUp();
+        MapTiles[3][4].BuildUp();
+        MapTiles[3][3].BuildUp();
+        MapTiles[3][3].BuildUp();
+        MapTiles[3][3].BuildUp();
         
         
         //End of tests
@@ -168,36 +138,164 @@ public class Santorini extends SimpleApplication {
         }
     };
 
-    private final AnalogListener analogListener = new AnalogListener() {
-        @Override
-        public void onAnalog(String name, float value, float tpf) {
-            
-            
-            if(Timer > 0.5f)
-            {
-                if (isRunning) {
-                    if (name.equals("Up")) {
-                        Vector3f v = Player1.Player.getLocalTranslation();
-                        Player1.Player.setLocalTranslation(v.x , v.y , v.z + 20.0f);           
+    private final AnalogListener analogListener = new AnalogListener()
+    {
+            @Override
+        public void onAnalog(String name, float value, float tpf) 
+        {
+
+            if(Player1.isActive)
+            { 
+                if(Timer > 0.5f)
+                {
+                        if (isRunning && !Player1.isBuilding)
+                        {
+                            if (name.equals("Up")) 
+                            {
+                               // Vector3f v = Player2.PlayerModel.getLocalTranslation();
+                               // Player2.PlayerModel.setLocalTranslation(v.x , v.y , v.z + 20.0f);   
+                                if(Player1.YTile<4)
+                                {
+                                    if(Player1.MoveUp(MapTiles[Player1.XTile][Player1.YTile+1].Height)==true)
+                                    {   
+                                        MapTiles[Player1.XTile][Player1.YTile].IsBuilder =true;           
+                                        MapTiles[Player1.XTile][Player1.YTile-1].IsBuilder =false;
+                                    }
+                                    else
+                                        return;
+                                }
+                            }
+                            if (name.equals("Right"))
+                            {
+                                if(Player1.XTile<4)
+                                {
+                                    if(Player1.MoveRight(MapTiles[Player1.XTile+1][Player1.YTile].Height)==true)
+                                    {
+                                        MapTiles[Player1.XTile][Player1.YTile].IsBuilder =true;        
+                                        MapTiles[Player1.XTile-1][Player1.YTile].IsBuilder =false;
+                                    }
+                                    else
+                                        return;
+                                }
+                           }
+                            if (name.equals("Left")) 
+                            {
+                                if(Player1.XTile>0)
+                                {
+                                    if(Player1.MoveLeft(MapTiles[Player1.XTile-1][Player1.YTile].Height)==true)
+                                    {
+                                        MapTiles[Player1.XTile][Player1.YTile].IsBuilder =true;
+                                        MapTiles[Player1.XTile+1][Player1.YTile].IsBuilder =false;
+                                    }
+                                    else
+                                        return;
+                                }
+                            }
+                            if (name.equals("Down"))
+                            {
+                                if(Player1.YTile>0)
+                                {
+                                    if(Player1.MoveDown(MapTiles[Player1.XTile][Player1.YTile-1].Height)==true)
+                                    {
+                                        MapTiles[Player1.XTile][Player1.YTile].IsBuilder =true;
+                                        MapTiles[Player1.XTile][Player1.YTile+1].IsBuilder =false;
+                                    }
+                                    else
+                                         return;
+                                }
+                            }
+                            Timer = 0.0f;
+                            Player1.isBuilding = true;
+                            //isRunning = false;
+                        }
+                        else if(isRunning && Player1.isBuilding)
+                        {
+                            //TODO Building
+                            Player2.isActive = true;
+                            Player1.isActive = false;
+                            Player1.isBuilding = false;
+                            Timer = 0.0f;
+                        }
+                        else 
+                           System.out.println("Press P to unpause.");
+
                     }
-                    if (name.equals("Right")) {
-                        Vector3f v = Player1.Player.getLocalTranslation();
-                        Player1.Player.setLocalTranslation(v.x + 20.0f, v.y, v.z);
-                    }
-                    if (name.equals("Left")) {
-                        Vector3f v = Player1.Player.getLocalTranslation();
-                        Player1.Player.setLocalTranslation(v.x - 20.0f, v.y, v.z);
-                    }
-                    if (name.equals("Down")) {
-                        Vector3f v = Player1.Player.getLocalTranslation();
-                        Player1.Player.setLocalTranslation(v.x , v.y, v.z-20.0f);
-                    }
-                    Timer = 0.0f;
-               
-                    //isRunning = false;
-                } else {
-                    System.out.println("Press P to unpause.");
                 }
+                else
+                {
+                    if(Timer>0.5f)
+                    {
+                    if (isRunning && !Player2.isBuilding)
+                    {
+                        if (name.equals("Up")) 
+                        {
+                           // Vector3f v = Player2.PlayerModel.getLocalTranslation();
+                           // Player2.PlayerModel.setLocalTranslation(v.x , v.y , v.z + 20.0f);   
+                            if(Player2.YTile<4)
+                            {
+                                if(Player2.MoveUp(MapTiles[Player2.XTile][Player2.YTile+1].Height)==true)
+                                {
+                                    MapTiles[Player2.XTile][Player2.YTile].IsBuilder =true;
+                                    MapTiles[Player2.XTile][Player2.YTile-1].IsBuilder =false;
+                                }
+                                else
+                                    return;
+                            }
+                        }
+                        if (name.equals("Right"))
+                        {
+                            if(Player2.XTile<4)
+                            {
+                                if(Player2.MoveRight(MapTiles[Player2.XTile+1][Player2.YTile].Height)==true)
+                                {
+                                    MapTiles[Player2.XTile][Player2.YTile].IsBuilder =true;    
+                                    MapTiles[Player2.XTile-1][Player2.YTile].IsBuilder =false;
+                                }
+                                else
+                                    return;
+                            }
+                       }
+                        if (name.equals("Left")) 
+                        {
+                            if(Player2.XTile>0)
+                            {
+                                if(Player2.MoveLeft(MapTiles[Player2.XTile-1][Player2.YTile].Height)==true)
+                                {
+                                    MapTiles[Player2.XTile][Player2.YTile].IsBuilder =true;
+                                    MapTiles[Player2.XTile+1][Player2.YTile].IsBuilder =false;
+                                }
+                                else
+                                    return;
+                            }
+                        }
+                        if (name.equals("Down"))
+                        {
+                            if(Player2.YTile>0)
+                            {
+                                if(Player2.MoveDown(MapTiles[Player2.XTile][Player2.YTile-1].Height)==true)
+                                {
+                                    MapTiles[Player2.XTile][Player2.YTile].IsBuilder =true;
+                                    MapTiles[Player2.XTile][Player2.YTile+1].IsBuilder =false;
+                                }
+                                else
+                                    return;
+                            }
+                        }
+                        Timer = 0.0f;
+                        Player2.isBuilding = true;
+                                //isRunning = false;
+                    } 
+                    else if(isRunning && Player2.isBuilding)
+                    {
+                        //TODO Building
+                        Player1.isActive = true;
+                        Player2.isActive = false;
+                        Player2.isBuilding = false;
+                        Timer = 0.0f;
+                    }
+                    else 
+                        System.out.println("Press P to unpause.");
+                }              
             }
         }
     };
@@ -229,9 +327,11 @@ water.setMaterial(waterProcessor.getMaterial());
 rootNode.attachChild(water);
     */
     @Override
-    public void simpleUpdate(float tpf) {
+    public void simpleUpdate(float tpf) 
+    {
         Timer += tpf;//*settings.getFrameRate();
     }
 
   
 }
+            

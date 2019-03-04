@@ -21,7 +21,7 @@ import com.jme3.scene.Spatial;
  * @author Przemek
  */
 public class MapTile {
-    int Height = -1; // -1 = ground, 0 = parter, 1 = first floor, 2 = second floor, 3 = dome
+    byte Height = -1; // -1 = ground, 0 = parter, 1 = first floor, 2 = second floor, 3 = dome
     boolean IsBuilder = false; // 0 = Builder is not standing here, 1 = Builder is standing on this tile
     byte X,Y;
     Node TileNode;
