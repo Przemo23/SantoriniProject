@@ -22,6 +22,7 @@ import com.jme3.input.controls.KeyTrigger;
  * Move your Logic into AppStates or Controls
  * @author normenhansen
  */
+
 public class Santorini extends SimpleApplication {
 
     public static void main(String[] args) {
@@ -146,10 +147,12 @@ public class Santorini extends SimpleApplication {
 
             if(Player1.isActive)
             { 
+                
                 if(Timer > 0.5f)
                 {
                         if (isRunning && !Player1.isBuilding)
                         {
+                            ClearTiles();
                             if (name.equals("Up")) 
                             {
                                // Vector3f v = Player2.PlayerModel.getLocalTranslation();
@@ -204,6 +207,7 @@ public class Santorini extends SimpleApplication {
                                          return;
                                 }
                             }
+                            ColorTiles(Player1.XTile,Player1.YTile,false);
                             Timer = 0.0f;
                             Player1.isBuilding = true;
                             //isRunning = false;
@@ -211,10 +215,12 @@ public class Santorini extends SimpleApplication {
                         else if(isRunning && Player1.isBuilding)
                         {
                             //TODO Building
+                            ClearTiles();
                             Player2.isActive = true;
                             Player1.isActive = false;
                             Player1.isBuilding = false;
                             Timer = 0.0f;
+                            ColorTiles(Player2.XTile,Player2.YTile,true);
                         }
                         else 
                            System.out.println("Press P to unpause.");
@@ -223,10 +229,12 @@ public class Santorini extends SimpleApplication {
                 }
                 else
                 {
+                    
                     if(Timer>0.5f)
                     {
                     if (isRunning && !Player2.isBuilding)
                     {
+                        ClearTiles();
                         if (name.equals("Up")) 
                         {
                            // Vector3f v = Player2.PlayerModel.getLocalTranslation();
@@ -281,6 +289,7 @@ public class Santorini extends SimpleApplication {
                                     return;
                             }
                         }
+                        ColorTiles(Player2.XTile,Player2.YTile,false);
                         Timer = 0.0f;
                         Player2.isBuilding = true;
                                 //isRunning = false;
@@ -288,17 +297,46 @@ public class Santorini extends SimpleApplication {
                     else if(isRunning && Player2.isBuilding)
                     {
                         //TODO Building
+                        ClearTiles();
                         Player1.isActive = true;
                         Player2.isActive = false;
                         Player2.isBuilding = false;
                         Timer = 0.0f;
+                        ColorTiles(Player1.XTile,Player1.YTile,true);
                     }
                     else 
                         System.out.println("Press P to unpause.");
-                }              
+               }              
             }
         }
     };
+    
+    void ColorTiles(byte XCord, byte YCord,boolean Movement) // if movement is true it means it's movement mode, if false it's building mode
+    {
+        if(XCord > 4 || XCord < 0 || YCord >4 || YCord < 0)
+            return; // Get  out of here
+        for(int i = XCord -1;i<=XCord+1;i++)
+        {
+            for(int j = YCord -1; j<=YCord+1;j++)
+            {
+                if(!(i > 4 || i < 0 || j > 4 || j < 0)) // Checking if tile that we are checking right now is a part of the map
+                {
+                    if(Movement==true && MapTiles[i][j].IsBuilder==false && (MapTiles[XCord][YCord].Height - MapTiles[i][j].Height) <= 1) // coloring the tile
+                        MapTiles[i][j].TileMat.setColor("Color",ColorRGBA.Magenta);
+                    if(Movement==false && MapTiles[i][j].IsBuilder==false && MapTiles[i][j].Height!=3)    
+                        MapTiles[i][j].TileMat.setColor("Color",ColorRGBA.Magenta);
+                }
+            }
+        }
+    }
+    void ClearTiles()
+    {
+        for(byte i = 0;i<5;i++)
+        {
+            for(byte j = 0;j<5;j++)
+                MapTiles[i][j].TileMat.setColor("Color",ColorRGBA.White);
+        }
+    }
     /*
     // we create a water processor
 SimpleWaterProcessor waterProcessor = new SimpleWaterProcessor(assetManager);

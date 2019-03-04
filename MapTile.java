@@ -23,10 +23,12 @@ import com.jme3.scene.Spatial;
 public class MapTile {
     byte Height = -1; // -1 = ground, 0 = parter, 1 = first floor, 2 = second floor, 3 = dome
     boolean IsBuilder = false; // 0 = Builder is not standing here, 1 = Builder is standing on this tile
+    //boolean IsAvailable = false;
     byte X,Y;
     Node TileNode;
     Spatial FloorTile,Parter,FirstFloor,SecondFloor,Dome;
     AssetManager Manager;
+    Material TileMat;
     //public MapTile(){};
     public MapTile(AssetManager ManagerImport,byte i,byte j)
     {
@@ -37,7 +39,7 @@ public class MapTile {
         Box FloorTileShape = new Box(10.0f,0.1f,10.0f);
         FloorTile = new Geometry("Tile",FloorTileShape);
         Manager = ManagerImport;        
-        Material TileMat = new Material(Manager, "Common/MatDefs/Misc/Unshaded.j3md");
+        TileMat = new Material(Manager, "Common/MatDefs/Misc/Unshaded.j3md");
         TileMat.setColor("Color",ColorRGBA.White);
         FloorTile.setMaterial(TileMat);
         FloorTile.setLocalTranslation(-53.0f + 20*i,40.0f,-53.0f +20*j);
@@ -89,4 +91,5 @@ public class MapTile {
            return true;
                
     }
+
 }
