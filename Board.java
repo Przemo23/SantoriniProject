@@ -7,6 +7,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
+import com.jme3.texture.Texture;
 
 public final class Board {
     private float TILE_LENGTH = 10.0f;
@@ -43,20 +44,21 @@ public final class Board {
 
 
  /* This is an inner class describing each board tile from 25 tiles */
-    public class BoardTile {
+    private class BoardTile {
 
         Node tileNode;
         private Spatial tile;
         private Material tileMat;
         private Spatial ground, first, second, dome;
-        private byte height;
+        private Texture tileTexture;
+        private Floor height;
         private boolean occupied;
         private int rowCoord;
         private int columnCoord;
 
         public BoardTile(int column, int row)
         {
-            height = 0;
+            height = Floor.ZERO;
             occupied = false;
             columnCoord = column;
             rowCoord = row;
@@ -64,7 +66,8 @@ public final class Board {
             Box tileShape = new Box(TILE_LENGTH, TILE_HEIGHT, TILE_WIDTH);
             tile = new Geometry("Tile", tileShape);
             tileMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-            tileMat.setColor("Color", ColorRGBA.Green);
+            tileTexture = assetManager.loadTexture("Textures/Terrain/Grass.jpg");
+            tileMat.setTexture("ColorMap", tileTexture);
             tile.setMaterial(tileMat);
             tile.setLocalTranslation(-53.0f + 20*column, 0.0f, -53.0f + 20*row);
             tileNode.attachChild(tile);
@@ -82,10 +85,10 @@ public final class Board {
             dome.setLocalScale(6.0f);
         }
 
-        boolean isOccupied(){
+        public boolean isOccupied(){
             return occupied;
         }
-        byte getHeight(){
+        public Floor getHeight(){
             return height;
         }
     }
