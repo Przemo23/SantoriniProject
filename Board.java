@@ -2,7 +2,6 @@ package mygame;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
-import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -18,11 +17,11 @@ public final class Board {
     private Node boardNode;
     BoardTile tiles[][];
 
-    public Board(AssetManager manager, Node node)
+    public Board(Game game)
     {
         boardNode = new Node("Board");
         tiles = new BoardTile[5][5];
-        assetManager = manager;
+        assetManager = game.getAssetManager();
          boardFrame = assetManager.loadModel("Models/Board/Board.j3o");
         boardFrame.setLocalTranslation(-23.0f, 0.1f, -3.0f);
         boardFrame.setLocalScale(20.0f);
@@ -34,7 +33,7 @@ public final class Board {
                 tiles[column][row] = new BoardTile(column, row);
                 boardNode.attachChild(tiles[column][row].tileNode);
             }
-            attachBoard(node);
+            attachBoard(game.getRootNode());
     }
 
     private void attachBoard(Node node)
