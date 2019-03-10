@@ -1,4 +1,4 @@
-package mygame;
+package com.jme.mygame;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.collision.CollisionResult;
@@ -26,7 +26,7 @@ public final class Board {
         boardNode = new Node("Board");
         tiles = new BoardTile[5][5];
         assetManager = game.getAssetManager();
-         boardFrame = assetManager.loadModel("Models/Board/Board.j3o");
+        boardFrame = assetManager.loadModel("Models/Board/Board.j3o");
         boardFrame.setLocalTranslation(-23.0f, 0.1f, -3.0f);
         boardFrame.setLocalScale(20.0f);
         boardNode.attachChild(boardFrame);
@@ -37,8 +37,8 @@ public final class Board {
                 tiles[column][row] = new BoardTile(column, row);
                 tilesNode.attachChild(tiles[column][row].tileNode);
             }
-            boardNode.attachChild(tilesNode);
-            attachBoard(game.getRootNode());
+        boardNode.attachChild(tilesNode);
+        attachBoard(game.getRootNode());
     }
 
 
@@ -61,11 +61,11 @@ public final class Board {
     }
 
 
- /* This is an inner class describing each board tile from 25 tiles */
-     class BoardTile {
+    /* This is an inner class describing each board tile from 25 tiles */
+    class BoardTile {
 
         Node tileNode;
-         Spatial tile;
+        Spatial tile;
         private Material tileMat;
         private Spatial ground, first, second, dome;
         private Texture tileTexture;

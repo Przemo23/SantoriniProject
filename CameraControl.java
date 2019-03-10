@@ -1,4 +1,4 @@
-package mygame;
+package com.jme.mygame;
 
 import com.jme3.input.ChaseCamera;
 import com.jme3.input.InputManager;
@@ -13,7 +13,7 @@ public final class CameraControl {
         ChaseCamera camera = new ChaseCamera(cam, target, inputManager);
         cam.setLocation(new Vector3f(0.0f, 200.0f, 0.0f));
         camera.setDefaultDistance(200);
-        camera.setMaxDistance(300);
+        camera.setMaxDistance(200);
         camera.setMinDistance(100);
         camera.setToggleRotationTrigger(new MouseButtonTrigger(MouseInput.BUTTON_MIDDLE), new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
         camera.setInvertVerticalAxis(true);
