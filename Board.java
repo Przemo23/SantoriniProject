@@ -1,6 +1,8 @@
-package mygame;
+package com.jme.mygame;
 
 import com.jme3.asset.AssetManager;
+import com.jme3.collision.CollisionResult;
+import com.jme3.collision.CollisionResults;
 import com.jme3.material.Material;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
@@ -14,15 +16,17 @@ public final class Board {
     private float TILE_HEIGHT = 0.1f;
     private AssetManager assetManager;
     private Spatial boardFrame;
+    private Node tilesNode;
     private Node boardNode;
     BoardTile tiles[][];
 
     public Board(Game game)
     {
+        tilesNode = new Node("Tiles");
         boardNode = new Node("Board");
         tiles = new BoardTile[5][5];
         assetManager = game.getAssetManager();
-         boardFrame = assetManager.loadModel("Models/Board/Board.j3o");
+        boardFrame = assetManager.loadModel("Models/Board/Board.j3o");
         boardFrame.setLocalTranslation(-23.0f, 0.1f, -3.0f);
         boardFrame.setLocalScale(20.0f);
         boardNode.attachChild(boardFrame);
@@ -31,22 +35,37 @@ public final class Board {
             for(byte row = 0; row<5; row++)
             {
                 tiles[column][row] = new BoardTile(column, row);
-                boardNode.attachChild(tiles[column][row].tileNode);
+                tilesNode.attachChild(tiles[column][row].tileNode);
             }
-            attachBoard(game.getRootNode());
+        boardNode.attachChild(tilesNode);
+        attachBoard(game.getRootNode());
     }
+
 
     private void attachBoard(Node node)
     {
         node.attachChild(boardNode);
     }
+    public Node getBoardNode() { return tilesNode; }
+    public void buildTile(int column, int row) { tiles[column][row].buildUp(); }
+    public boolean tileCollides(int column, int row, CollisionResult collisionResult)
+    {
+        Node n = collisionResult.getGeometry().getParent();
+        while(n.getParent() != null)
+        {
+            if(n.equals(tiles[column][row].tileNode))
+                return true;
+            n = n.getParent();
+        }
+        return false;
+    }
 
 
- /* This is an inner class describing each board tile from 25 tiles */
-    private class BoardTile {
+    /* This is an inner class describing each board tile from 25 tiles */
+    class BoardTile {
 
         Node tileNode;
-        private Spatial tile;
+        Spatial tile;
         private Material tileMat;
         private Spatial ground, first, second, dome;
         private Texture tileTexture;
@@ -74,13 +93,13 @@ public final class Board {
             first = assetManager.loadModel("Models/Floors/First.j3o");
             second = assetManager.loadModel("Models/Floors/Second.j3o");
             dome = assetManager.loadModel("Models/Floors/Dome.j3o");
-            ground.setLocalTranslation(-52.0f+column*20.0f,40.0f,-52.0f+row*20.0f);
+            ground.setLocalTranslation(-52.0f+column*20.0f,0.0f,-52.0f+row*20.0f);
             ground.setLocalScale(3.0f);
-            first.setLocalTranslation(-52.0f+column*20.0f,46.0f,-52.0f+row*20.0f);
+            first.setLocalTranslation(-52.0f+column*20.0f,6.0f,-52.0f+row*20.0f);
             first.setLocalScale(3.0f);
-            second.setLocalTranslation(-52.0f+column*20.0f,57.2f,-52.0f+row*20.0f);
+            second.setLocalTranslation(-52.0f+column*20.0f,17.2f,-52.0f+row*20.0f);
             second.setLocalScale(3.0f);
-            dome.setLocalTranslation(-52.0f+column*20.0f,61.0f,-52.0f+row*20.0f);
+            dome.setLocalTranslation(-52.0f+column*20.0f,21.0f,-52.0f+row*20.0f);
             dome.setLocalScale(6.0f);
         }
 
@@ -89,6 +108,29 @@ public final class Board {
         }
         public Floor getHeight(){
             return height;
+        }
+        public void buildUp()
+        {
+            if(height == Floor.ZERO)
+            {
+                tileNode.attachChild(ground);
+                height = Floor.GROUND;
+            }
+            else if(height == Floor.GROUND)
+            {
+                height = Floor.FIRST;
+                tileNode.attachChild(first);
+            }
+            else if(height == Floor.FIRST)
+            {
+                height = Floor.SECOND;
+                tileNode.attachChild(second);
+            }
+            else if(height == Floor.SECOND)
+            {
+                height = Floor.DOME;
+                tileNode.attachChild(dome);
+            }
         }
     }
 }
