@@ -1,8 +1,7 @@
-package com.jme.mygame;
+package mygame;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.collision.CollisionResult;
-import com.jme3.collision.CollisionResults;
 import com.jme3.material.Material;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
@@ -18,15 +17,15 @@ public final class Board {
     private Spatial boardFrame;
     private Node tilesNode;
     private Node boardNode;
-    BoardTile tiles[][];
+    private BoardTile tiles[][];
 
-    public Board(Game game)
+    public Board(InitializationState game)
     {
         tilesNode = new Node("Tiles");
         boardNode = new Node("Board");
         tiles = new BoardTile[5][5];
         assetManager = game.getAssetManager();
-        boardFrame = assetManager.loadModel("Models/Board/Board.j3o");
+         boardFrame = assetManager.loadModel("Models/Board/Board.j3o");
         boardFrame.setLocalTranslation(-23.0f, 0.1f, -3.0f);
         boardFrame.setLocalScale(20.0f);
         boardNode.attachChild(boardFrame);
@@ -37,8 +36,8 @@ public final class Board {
                 tiles[column][row] = new BoardTile(column, row);
                 tilesNode.attachChild(tiles[column][row].tileNode);
             }
-        boardNode.attachChild(tilesNode);
-        attachBoard(game.getRootNode());
+            boardNode.attachChild(tilesNode);
+            attachBoard(game.getRootNode());
     }
 
 
@@ -59,13 +58,14 @@ public final class Board {
         }
         return false;
     }
+    public Spatial boardCentre() {return tiles[2][2].tile;}
 
 
-    /* This is an inner class describing each board tile from 25 tiles */
-    class BoardTile {
+ /* This is an inner class describing each board tile from 25 tiles */
+     class BoardTile {
 
         Node tileNode;
-        Spatial tile;
+         Spatial tile;
         private Material tileMat;
         private Spatial ground, first, second, dome;
         private Texture tileTexture;
@@ -101,6 +101,7 @@ public final class Board {
             second.setLocalScale(3.0f);
             dome.setLocalTranslation(-52.0f+column*20.0f,21.0f,-52.0f+row*20.0f);
             dome.setLocalScale(6.0f);
+
         }
 
         public boolean isOccupied(){

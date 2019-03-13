@@ -1,4 +1,4 @@
-package com.jme.mygame;
+package mygame;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.input.controls.ActionListener;

@@ -1,4 +1,4 @@
-package com.jme.mygame;
+package mygame;
 import com.jme3.app.SimpleApplication;
 import com.jme3.collision.CollisionResult;
 import com.jme3.collision.CollisionResults;
@@ -13,34 +13,20 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.shape.Sphere;
 
-
 public class Game extends SimpleApplication {
 
     public static void main(String[] args) {
         Game app = new Game();
         app.start();
     }
-
-    Scene scene;
-    Board board;
-    Player player;
+    InitializationState iS = new InitializationState();
     Geometry mark;
 
     @Override
     public void simpleInitApp() {
+        stateManager.attach(iS);
         initKeys();
         initMark();
-        board = new Board(this);
-        player = new Player(assetManager);
-        //  player.attachBuilder(player.female, rootNode).attachBuilder(player.male, rootNode);
-        scene = new Scene(assetManager,rootNode,viewPort);
-        new CameraControl(cam, board.tiles[2][2].tile, inputManager);
-        DirectionalLight sun = new DirectionalLight();
-        sun.setDirection(new Vector3f(1, -1, -2).normalizeLocal());
-        sun.setColor(ColorRGBA.White);
-        rootNode.addLight(sun);
-
-
     }
 
     private void initKeys() {
@@ -60,25 +46,15 @@ public class Game extends SimpleApplication {
                 Vector3f dir = cam.getWorldCoordinates(
                         click2d, 1f).subtractLocal(click3d).normalizeLocal();
                 Ray ray = new Ray(click3d, dir);
-                board.getBoardNode().collideWith(ray, results);
-                // 4. Print the results
-                System.out.println("----- Collisions? " + results.size() + "-----");
-                for (int i = 0; i < results.size(); i++) {
-                    // For each hit, we know distance, impact point, name of geometry.
-                    float dist = results.getCollision(i).getDistance();
-                    Vector3f pt = results.getCollision(i).getContactPoint();
-                    String hit = results.getCollision(i).getGeometry().getName();
-                    System.out.println("* Collision #" + i);
-                    System.out.println("  You shot " + hit + " at " + pt + ", " + dist + " wu away.");
-                }
+                iS.board.getBoardNode().collideWith(ray, results);
                 // 5. Use the results (we mark the hit object)
                 if (results.size() > 0) {
                     // The closest collision point is what was truly hit:
                     CollisionResult closest = results.getClosestCollision();
                     for(int i = 0; i<5; i++)
                         for(int j = 0; j<5; j++)
-                            if(board.tileCollides(i, j, closest))
-                                board.buildTile(i, j);
+                            if(iS.board.tileCollides(i, j, closest))
+                                iS.board.buildTile(i, j);
                     // Let's interact - we mark the hit with a red dot.
                     mark.setLocalTranslation(closest.getContactPoint());
                     rootNode.attachChild(mark);

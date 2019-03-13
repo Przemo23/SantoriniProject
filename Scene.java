@@ -1,4 +1,4 @@
-package com.jme.mygame;
+package mygame;
 
 
 
