@@ -19,13 +19,13 @@ public final class Board {
     private Node boardNode;
     private BoardTile tiles[][];
 
-    public Board(InitializationState game)
+    Board(Game game)
     {
         tilesNode = new Node("Tiles");
         boardNode = new Node("Board");
         tiles = new BoardTile[5][5];
         assetManager = game.getAssetManager();
-         boardFrame = assetManager.loadModel("Models/Board/Board.j3o");
+        boardFrame = assetManager.loadModel("Models/Board/Board.j3o");
         boardFrame.setLocalTranslation(-23.0f, 0.1f, -3.0f);
         boardFrame.setLocalScale(20.0f);
         boardNode.attachChild(boardFrame);
@@ -58,6 +58,7 @@ public final class Board {
         }
         return false;
     }
+    public BoardTile getTile(int column, int row) { return tiles[column][row]; }
     public Spatial boardCentre() {return tiles[2][2].tile;}
 
 
@@ -131,6 +132,7 @@ public final class Board {
             {
                 height = Floor.DOME;
                 tileNode.attachChild(dome);
+                occupied = true;
             }
         }
     }
