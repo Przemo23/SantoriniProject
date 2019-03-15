@@ -1,13 +1,15 @@
-package mygame;
+package com.jme.mygame;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.collision.CollisionResult;
 import com.jme3.material.Material;
+import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.texture.Texture;
+import com.jme3.light.AmbientLight;
 
 public final class Board {
     private float TILE_LENGTH = 10.0f;
@@ -60,6 +62,29 @@ public final class Board {
     }
     public BoardTile getTile(int column, int row) { return tiles[column][row]; }
     public Spatial boardCentre() {return tiles[2][2].tile;}
+    public void switchOffLights()
+    {
+        for(int i=0; i<5;i++)
+        {
+            for(int j=0;j<5;j++)
+            {
+                tiles[i][j].switchOff();
+            }
+        }
+
+    }
+    public void highLightBoard(int coordX,int coordY)
+    {
+        if((coordX>4 || coordX < 0 || coordY >4 || coordY <0)==false) {
+            for (int i = coordX - 1; i <= coordX + 1; i++) {
+                for (int j = coordY - 1; j <= coordY + 1; j++) {
+                    if (tiles[i][j].isOccupied() == false || tiles[i][j].getHeight() != Floor.DOME)
+                        tiles[i][j].highlight();
+                }
+            }
+        }
+
+    }
 
 
  /* This is an inner class describing each board tile from 25 tiles */
@@ -74,9 +99,12 @@ public final class Board {
         private boolean occupied;
         private int rowCoord;
         private int columnCoord;
+        AmbientLight light;
 
         public BoardTile(int column, int row)
         {
+            light = new AmbientLight();
+            light.setColor(ColorRGBA.Red.mult(1.3f));
             height = Floor.ZERO;
             occupied = false;
             columnCoord = column;
@@ -85,6 +113,7 @@ public final class Board {
             Box tileShape = new Box(TILE_LENGTH, TILE_HEIGHT, TILE_WIDTH);
             tile = new Geometry("Tile", tileShape);
             tileMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+            //tileMat.setColor("Color",ColorRGBA.White);
             tileTexture = assetManager.loadTexture("Textures/Terrain/Grass.jpg");
             tileMat.setTexture("ColorMap", tileTexture);
             tile.setMaterial(tileMat);
@@ -135,5 +164,9 @@ public final class Board {
                 occupied = true;
             }
         }
+     public void highlight() { tileNode.addLight(light); }
+     public void switchOff() {tileNode.removeLight(light);}
     }
+
+
 }
