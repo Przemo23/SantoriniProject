@@ -1,7 +1,8 @@
-package com.jme.mygame;
+package mygame;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.collision.CollisionResult;
+import com.jme3.light.AmbientLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Geometry;
@@ -9,7 +10,6 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.texture.Texture;
-import com.jme3.light.AmbientLight;
 
 public final class Board {
     private float TILE_LENGTH = 10.0f;
@@ -41,16 +41,13 @@ public final class Board {
             boardNode.attachChild(tilesNode);
             attachBoard(game.getRootNode());
     }
-
-
     private void attachBoard(Node node)
     {
         node.attachChild(boardNode);
     }
     public Node getBoardNode() { return tilesNode; }
     public void buildTile(int column, int row) { tiles[column][row].buildUp(); }
-    public boolean tileCollides(int column, int row, CollisionResult collisionResult)
-    {
+    public boolean tileCollides(int column, int row, CollisionResult collisionResult) {
         Node n = collisionResult.getGeometry().getParent();
         while(n.getParent() != null)
         {
@@ -60,10 +57,7 @@ public final class Board {
         }
         return false;
     }
-    public BoardTile getTile(int column, int row) { return tiles[column][row]; }
-    public Spatial boardCentre() {return tiles[2][2].tile;}
-    public void switchOffLights()
-    {
+    public void switchOffLights() {
         for(int i=0; i<5;i++)
         {
             for(int j=0;j<5;j++)
@@ -73,18 +67,19 @@ public final class Board {
         }
 
     }
-    public void highLightBoard(int coordX,int coordY)
-    {
-        if((coordX>4 || coordX < 0 || coordY >4 || coordY <0)==false) {
+    public void highLightBoard(int coordX,int coordY) {
+        if(!(coordX > 4 || coordX < 0 || coordY > 4 || coordY < 0)) {
             for (int i = coordX - 1; i <= coordX + 1; i++) {
                 for (int j = coordY - 1; j <= coordY + 1; j++) {
-                    if (tiles[i][j].isOccupied() == false || tiles[i][j].getHeight() != Floor.DOME)
+                    if (!tiles[i][j].isOccupied() || tiles[i][j].getHeight() != Floor.DOME)
                         tiles[i][j].highlight();
                 }
             }
         }
 
     }
+    public BoardTile getTile(int column, int row) { return tiles[column][row]; }
+    public Spatial boardCentre() {return tiles[2][2].tile;}
 
 
  /* This is an inner class describing each board tile from 25 tiles */
@@ -96,15 +91,14 @@ public final class Board {
         private Spatial ground, first, second, dome;
         private Texture tileTexture;
         private Floor height;
+        AmbientLight light;
         private boolean occupied;
         private int rowCoord;
         private int columnCoord;
-        AmbientLight light;
 
-        public BoardTile(int column, int row)
-        {
+        public BoardTile(int column, int row) {
             light = new AmbientLight();
-            light.setColor(ColorRGBA.Red.mult(1.3f));
+            light.setColor(ColorRGBA.White.mult(0.6f));
             height = Floor.ZERO;
             occupied = false;
             columnCoord = column;
@@ -113,7 +107,6 @@ public final class Board {
             Box tileShape = new Box(TILE_LENGTH, TILE_HEIGHT, TILE_WIDTH);
             tile = new Geometry("Tile", tileShape);
             tileMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-            //tileMat.setColor("Color",ColorRGBA.White);
             tileTexture = assetManager.loadTexture("Textures/Terrain/Grass.jpg");
             tileMat.setTexture("ColorMap", tileTexture);
             tile.setMaterial(tileMat);
@@ -132,16 +125,18 @@ public final class Board {
             dome.setLocalTranslation(-52.0f+column*20.0f,21.0f,-52.0f+row*20.0f);
             dome.setLocalScale(6.0f);
 
-        }
 
+        }
         public boolean isOccupied(){
             return occupied;
         }
+        public void setOccupied(boolean b) { occupied = b; }
         public Floor getHeight(){
             return height;
         }
-        public void buildUp()
-        {
+        public void highlight() { tileNode.addLight(light); }
+        public void switchOff() {tileNode.removeLight(light);}
+        public void buildUp() {
             if(height == Floor.ZERO)
             {
                 tileNode.attachChild(ground);
@@ -164,9 +159,6 @@ public final class Board {
                 occupied = true;
             }
         }
-     public void highlight() { tileNode.addLight(light); }
-     public void switchOff() {tileNode.removeLight(light);}
-    }
 
-
+ }
 }

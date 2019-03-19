@@ -2,15 +2,13 @@ package mygame;
 
 public class BasicRules {
 
-    public void movementPhase()
-    {
+    public void move() {
 
     }
-    public void buildingPhase()
-    {
+    public void build() {
 
     }
-    public boolean winAccomplished()
+    public boolean isWinAccomplished()
     {
         return true;
     }

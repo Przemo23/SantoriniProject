@@ -30,7 +30,6 @@ class InitializationState extends AbstractAppState{
     private InputManager inputManager;
     private ViewPort viewPort;
     private Camera cam;
-    private Geometry mark;
     private Board board;
 
 

@@ -9,17 +9,20 @@ public class Game extends SimpleApplication {
         app.start();
     }
 
-     InitializationState iS = new InitializationState();
+     private InitializationState iS = new InitializationState();
      BuilderSetState bSS = new BuilderSetState();
-    Player[] player;
-    Board board;
+     InGameState iGS;
+     Player[] player;
+     Board board;
 
     @Override
     public void simpleInitApp() {
         board = new Board(this);
-        player = new Player[1];
-        for(int i = 0; i<player.length; i++)
-            player[i] = new Player(assetManager);
+        player = new Player[2];
+            player[0] = new Player(this, "Blue");
+            player[1] = new Player(this, "Red");
+           // player[2] = new Player(assetManager, "Green");
+        board.highLightBoard(2, 2);
         stateManager.attach(iS);
     }
 }

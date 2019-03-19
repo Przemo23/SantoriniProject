@@ -31,6 +31,7 @@ public class BuilderSetState extends AbstractAppState {
     private ViewPort viewPort;
     private Camera cam;
     private Geometry mark;
+    private Builder phantomBuilder;
     private Board board;
     private Player[] player;
     private int buildersCount;
@@ -48,13 +49,14 @@ public class BuilderSetState extends AbstractAppState {
         this.cam = this.app.getCamera();
         this.board = ((Game) app).board;
         this.player = ((Game) app).player;
+        phantomBuilder = new Builder(assetManager, "White");
+        rootNode.attachChild(phantomBuilder.getBuilderModel());
         buildersCount = 0;
         initMark();
         initKeys();
     }
     @Override
-    public void setEnabled(boolean value)
-    {
+    public void setEnabled(boolean value) {
         if(!value)
             actionListener = null;
     }
@@ -113,12 +115,13 @@ public class BuilderSetState extends AbstractAppState {
         }
     };
     @Override
-    public void cleanup()
-    {
+    public void cleanup() {
         super.cleanup();
         actionListener = null;
         inputManager.deleteMapping("selectTile");
-
+        rootNode.detachChild(phantomBuilder.getBuilderModel());
+        ((Game) app).iGS = new InGameState();
+        stateManager.attach(((Game) app).iGS);
     }
     private void initMark() {
         Sphere sphere = new Sphere(30, 30, 0.2f);
@@ -127,6 +130,21 @@ public class BuilderSetState extends AbstractAppState {
         mark_mat.setColor("Color", ColorRGBA.Red);
         mark.setMaterial(mark_mat);
     }
-    public AssetManager getAssetManager(){return assetManager;}
-    public Node getRootNode(){return rootNode;}
+    @Override
+    public void update(float tpf) {
+        CollisionResults results = new CollisionResults();
+        Vector2f click2d = inputManager.getCursorPosition().clone();
+        Vector3f click3d = cam.getWorldCoordinates(click2d, 0f).clone();
+        Vector3f dir = cam.getWorldCoordinates(click2d, 1f).subtractLocal(click3d).normalizeLocal();
+        Ray ray = new Ray(click3d, dir);
+        board.getBoardNode().collideWith(ray, results);
+        if (results.size() > 0) {
+            CollisionResult closest = results.getClosestCollision();
+            for(int column = 0; column<5; column++)
+                for(int row = 0; row<5; row++)
+                    if (board.tileCollides(column, row, closest) && !board.getTile(column, row).isOccupied())
+                        phantomBuilder.getBuilderModel().setLocalTranslation(-52.0f + column*20.0f, 3.0f,-52.0f+row*20.f);
+        }
+
+    }
 }
