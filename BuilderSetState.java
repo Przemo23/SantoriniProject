@@ -83,13 +83,13 @@ public class BuilderSetState extends AbstractAppState {
                             for(int row = 0; row<5; row++)
                                 if (board.tileCollides(column, row, closest) && !board.getTile(column, row).isOccupied()) {
                                     if (!player[i].isBuilderSet(player[i].male)) {
-                                        player[i].attachBuilder(player[i].male, rootNode, column, row);
+                                        player[i].attachBuilder(player[i].male, column, row);
                                         System.out.println("Player " + i + " male was set");
                                         builderWasSet = true;
                                         buildersCount++;
                                         break;
                                     } else if (!player[i].isBuilderSet(player[i].female)) {
-                                        player[i].attachBuilder(player[i].female, rootNode, column, row);
+                                        player[i].attachBuilder(player[i].female, column, row);
                                         System.out.println("Player " + i + " female was set");
                                         builderWasSet = true;
                                         buildersCount++;

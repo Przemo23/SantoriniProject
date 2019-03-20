@@ -30,6 +30,9 @@ public class InGameState extends AbstractAppState {
     private Camera cam;
     private Geometry mark;
     private Board board;
+    private Player[] player;
+    private Builder selected;
+    private int active; // player[active] is the one whose turn is currently considered
 
     @Override
     public void initialize(AppStateManager stateManager, Application app) { super.initialize(stateManager, app);
@@ -40,43 +43,35 @@ public class InGameState extends AbstractAppState {
         this.inputManager = this.app.getInputManager();
         this.cam = this.app.getCamera();
         this.board = ((Game) app).board;
+        this.player = ((Game) app).player;
+        this.active = 0;
         initMark();
         initKeys();
 
     }
     private void initKeys() {
-        inputManager.addMapping("selectTile", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
-        inputManager.addListener(actionListener, "selectTile");
+        inputManager.addMapping("selectBuilder", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+        inputManager.addMapping("cancelBuilder", new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
+        inputManager.addListener(actionListener, "selectBuilder");
+        inputManager.addListener(actionListener, "cancelBuilder");
     }
     private ActionListener actionListener = new ActionListener() {
         @Override
         public void onAction(String name, boolean keyPressed, float tpf) {
-            if (name.equals("selectTile") && !keyPressed) {
-                // 1. Reset results list.
-                CollisionResults results = new CollisionResults();
-                Vector2f click2d = inputManager.getCursorPosition().clone();
-                Vector3f click3d = cam.getWorldCoordinates(click2d, 0f).clone();
-                Vector3f dir = cam.getWorldCoordinates(click2d, 1f).subtractLocal(click3d).normalizeLocal();
-                Ray ray = new Ray(click3d, dir);
-                board.getBoardNode().collideWith(ray, results);
-                // 4. Print the results
-                System.out.println("----- Collisions? " + results.size() + "-----");
-                for (int i = 0; i < results.size(); i++) {
-                    // For each hit, we know distance, impact point, name of geometry.
-                    float dist = results.getCollision(i).getDistance();
-                    Vector3f pt = results.getCollision(i).getContactPoint();
-                    String hit = results.getCollision(i).getGeometry().getName();
-                    System.out.println("* Collision #" + i);
-                    System.out.println("  You shot " + hit + " at " + pt + ", " + dist + " wu away.");
-                }
-                // 5. Use the results (we mark the hit object)
+            CollisionResults results = new CollisionResults();
+            Vector2f click2d = inputManager.getCursorPosition().clone();
+            Vector3f click3d = cam.getWorldCoordinates(click2d, 0f).clone();
+            Vector3f dir = cam.getWorldCoordinates(click2d, 1f).subtractLocal(click3d).normalizeLocal();
+            Ray ray = new Ray(click3d, dir);
+            if (name.equals("selectBuilder") && !keyPressed) {
+                player[active].getBuildersNode().collideWith(ray, results);
                 if (results.size() > 0) {
-                    // The closest collision point is what was truly hit:
                     CollisionResult closest = results.getClosestCollision();
-                    for(int i = 0; i<5; i++)
-                        for(int j = 0; j<5; j++)
-                            if(board.tileCollides(i, j, closest) && !board.getTile(i, j).isOccupied())
-                                board.buildTile(i, j);
+                    if(player[active].collidingBuilder(closest) != null)
+                    {
+                        board.buildTile(2, 2);
+                        selected = player[active].collidingBuilder(closest);
+                    }
                     // Let's interact - we mark the hit with a red dot.
                     mark.setLocalTranslation(closest.getContactPoint());
                     rootNode.attachChild(mark);

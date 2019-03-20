@@ -3,25 +3,30 @@ import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 
 public class Builder {
     private Geometry builderModel;
-    private int tileColumn, tileRow;
     private Floor floorLVL;
-    private float offsets[];
     private Material material;
+    private Node builderNode;
+    private int tileColumn, tileRow;
+    private float offsets[];
 
     private boolean set;
     private boolean moved;
     private boolean building;
     Builder(AssetManager assetManager, String color)
     {
+        builderNode = new Node("BuilderNode");
         Box box = new Box(1f, 3f, 1f);
         floorLVL = Floor.ZERO;
         offsets = new float[]{3.0f, 13.0f, 20.2f, 26.0f};
         moved = building = false;
         builderModel = new Geometry("Builder", box);
+        builderNode.attachChild(builderModel);
         material = new Material(assetManager,
                 "Common/MatDefs/Misc/Unshaded.j3md");  // create a simple material
         setTeamColor(color);
@@ -56,4 +61,5 @@ public class Builder {
     }
     public void setEnabled(boolean b) { set = b; }
     public boolean isSet() { return set; }
+    public Node getBuilderNode() { return builderNode;  }
 }
