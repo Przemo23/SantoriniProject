@@ -1,25 +1,80 @@
-package com.jme.mygame;
+package mygame;
 
-import com.jme3.asset.AssetManager;
-import com.jme3.input.controls.ActionListener;
-import com.jme3.input.controls.AnalogListener;
+import com.jme3.collision.CollisionResult;
+import com.jme3.collision.CollisionResults;
+import com.jme3.math.Ray;
 import com.jme3.scene.Node;
 
 public class Player  {
+    private Node buildersNode;
     Builder male, female;
     BasicRules rules;
+    Game game;
 
-    public Player(AssetManager assetManager)
-    {
-        male = new Builder(assetManager, "First", 2, 0);
-        female = new Builder(assetManager, "Second", 3, 3);
-        rules = new BasicRules();
+    public Player(Game game, String color) {
+        this.game = game;
+        this.buildersNode = new Node("BuildersNode");
+        this.male = new Builder(game.getAssetManager(), color);
+        this.female = new Builder(game.getAssetManager(), color);
+        this.rules = new BasicRules();
+        game.getRootNode().attachChild(buildersNode);
+    }
+    public void attachBuilder(Builder builder, int column, int row) {
+        builder.getBuilderModel().setLocalTranslation(-52.0f + column*20.0f, Builder.offsets[builder.getFloorLvl().height],-52.0f+row*20.f);
+        buildersNode.attachChild(builder.getBuilderNode());
+        builder.setCoordinates(column, row);
+        builder.setEnabled(true);
+        game.board.getTile(column, row).setBuildable(false);
+        game.board.getTile(column, row).setMovable(false);
     }
 
-    public Player attachBuilder(Builder builder, Node node)
-    {
-        node.attachChild(builder.getBuilderModel());
-        return this;
+    public Builder collidingBuilder(CollisionResult collisionResult) {
+        Node n = collisionResult.getGeometry().getParent();
+        while(n.getParent() != null)
+        {
+            if(n.equals(male.getBuilderNode()))
+                return male;
+            else if(n.equals(female.getBuilderNode()))
+                return female;
+        }
+        return null;
     }
 
+    public boolean isBuilderSet(Builder builder) {
+        return builder.isSet();
+    }
+
+    public Node getBuildersNode() {
+        return buildersNode;
+    }
+
+    public void  moveBuilder(Board board, Ray ray, CollisionResults collisionResults, Builder builder){
+
+        if(builder.getBuilderNode().equals(male.getBuilderNode()))
+            rules.move(board, ray, collisionResults, male);
+
+        else if(builder.getBuilderNode().equals(female.getBuilderNode()))
+            rules.move(board, ray, collisionResults, female);
+    }
+
+    public void build(Board board, Ray ray, CollisionResults results, Builder builder) {
+        if(builder.getBuilderNode().equals(male.getBuilderNode()))
+            rules.build(board, ray, results, male);
+        else if(builder.getBuilderNode().equals(female.getBuilderNode()))
+            rules.build(board, ray, results, female);
+    }
+
+    public void resetBuilderPhaseFlags(Builder builder) {
+        if(builder.getBuilderNode().equals(male.getBuilderNode()))
+        {
+            male.setMoved(false);
+            male.setBuilt(false);
+        }
+
+        else if(builder.getBuilderNode().equals(female.getBuilderNode()))
+        {
+            female.setBuilt(false);
+            female.setMoved(false);
+        }
+    }
 }
