@@ -10,42 +10,40 @@ import com.jme3.scene.shape.Box;
 import java.util.ArrayList;
 
 public class Builder {
-    static final float[] offsets = new float[]{3.0f, 13.0f, 20.2f, 26.0f};
-    private Geometry builderModel;
+    static final float[] OFFSETS = new float[]{3.0f, 13.0f, 20.2f, 26.0f};
+// basic info about builder's location
+    private int tileColumn;
+    private int tileRow;
     private Floor floorLVL;
-    private Material material;
-    private Node builderNode;
-    private int tileColumn, tileRow;
+// contains "available" tiles during movement/building phase
     private ArrayList<Vector2f> adjacentTiles;
+// flags
     private boolean set;
     private boolean moved;
     private boolean built;
-    Builder(AssetManager assetManager, String color)
-    {
-        adjacentTiles = new ArrayList<>();
-        builderNode = new Node("BuilderNode");
-        Box box = new Box(1f, 3f, 1f);
+// set of variables necessary to load builder's model
+    private Node builderNode;
+    private Geometry builderModel;
+    private Material material;
+
+    Builder(AssetManager assetManager, String color) {
+    // 1. preliminary initialization
         floorLVL = Floor.ZERO;
-        moved = built = false;
-        builderModel = new Geometry("Builder", box);
-        builderNode.attachChild(builderModel);
-        material = new Material(assetManager,
-                "Common/MatDefs/Misc/Unshaded.j3md");  // create a simple material
-        setTeamColor(color);
-        builderModel.setMaterial(material);
-        builderModel.scale(3.0f);
-        set = false;
+        adjacentTiles = new ArrayList<>();
         moved = false;
+        built = false;
+        set = false;
+        builderNode = new Node("BuilderNode");
+    // 2. loading builder model
+        Box box = new Box(1f, 3f, 1f);
+        builderModel = new Geometry("Builder", box);
+        builderModel.scale(3.0f);
+        material = new Material(assetManager,"Common/MatDefs/Misc/Unshaded.j3md");
+        builderModel.setMaterial(material);
+        setTeamColor(color);
+        builderNode.attachChild(builderModel);
     }
 
-    Builder setCoordinates(int column, int row) {
-        tileRow = row;
-        tileColumn =  column;
-        return this;
-    }
-    Geometry getBuilderModel(){
-        return builderModel;
-    }
     private void setTeamColor(String color)  {
         switch (color) {
             case "Blue":
@@ -60,20 +58,49 @@ public class Builder {
         }
 
     }
+
+/** Sets builder's board coordinates */
+    public void setCoordinates(int column, int row) {
+        tileRow = row;
+        tileColumn =  column;
+    }
+
+/** Returns a builder's model */
+    public Geometry getBuilderModel(){
+        return builderModel;
+    }
+
+/** "Set" flag becomes true after setting builder during the initialization phase */
     public void setEnabled(boolean b) { set = b; }
+
+/** Adds a tile which has [column][row] coordinates to the adjacency list (builder can move/build there depending on the phase)  */
     public void addAdjacentTile(int column, int row){
         adjacentTiles.add(new Vector2f(column, row));
     }
+
+/** Clears the array of the adjacency list*/
     public void removeAdjacentTiles() {
         adjacentTiles.clear();
     }
+
+/** Returns true if a builder was set on the board OR false otherwise*/
     public boolean isSet() { return set; }
+
+/** Returns a node which the builder is directly attached to  */
     public Node getBuilderNode() { return builderNode;  }
+
+/** Returns builder's column coordinate */
     public int getColumn() { return tileColumn; }
+
+/** Returns builder's row coordinate */
     public int getRow() { return tileRow; }
+
+/** Returns a list of adjacent tiles that the builder can move to/build on */
     public ArrayList<Vector2f> getAdjacentTiles(){
         return adjacentTiles;
     }
+
+/** Flag describing whether */
     public void setMoved(boolean b){
         moved = b;
     }

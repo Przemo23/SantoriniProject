@@ -79,7 +79,7 @@ public class BuilderSetState extends AbstractAppState {
                     for(int i = 0; i<player.length; i++){
                         for(int column = 0; column<5; column++){
                             for(int row = 0; row<5; row++)
-                                if (board.collidingTile(column, row, closest) != null && !board.getTile(column, row).isCompleted()) {
+                                if (board.collidingTile(column, row, closest) != null && board.getTile(column, row).isBuildable() &&  board.getTile(column, row).isBuildable() &&!board.getTile(column, row).isCompleted()) {
                                     if (!player[i].isBuilderSet(player[i].male)) {
                                         player[i].attachBuilder(player[i].male, column, row);
                                         System.out.println("Player " + i + " male was set");

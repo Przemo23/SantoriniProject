@@ -21,17 +21,8 @@ public class Game extends SimpleApplication {
         player = new Player[2];
             player[0] = new Player(this, "Blue");
             player[1] = new Player(this, "Red");
-           // player[2] = new Player(assetManager, "Green");
-        board.buildTile(1,1);
-        board.buildTile(1,1);
-        board.buildTile(1,1);
-        board.buildTile(1,3);
-        board.buildTile(0,3);
-        board.buildTile(0,3);
-        board.buildTile(0,3);
-        board.buildTile(0,3);
-        board.buildTile(2,2);
-        board.buildTile(2,2);
+        //    player[2] = new Player(this, "Green");
+
         stateManager.attach(iS);
     }
 }

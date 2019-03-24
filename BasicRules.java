@@ -22,7 +22,7 @@ public class BasicRules {
                         board.getTile(selected.getColumn(), selected.getRow()).setMovable(true); // Current tile is no longer occupied
                         board.getTile(selected.getColumn(), selected.getRow()).setBuildable(true); // Current tile is no longer occupied
                         selected.setFloorLvl(target.getHeight());
-                        selected.getBuilderModel().setLocalTranslation(-52.0f + coordinates.x*20.0f, Builder.offsets[selected.getFloorLvl().height],-52.0f+coordinates.y*20.f);
+                        selected.getBuilderModel().setLocalTranslation(-52.0f + coordinates.x*20.0f, Builder.OFFSETS[selected.getFloorLvl().height],-52.0f+coordinates.y*20.f);
                         selected.setCoordinates((int)coordinates.x, (int)coordinates.y);
                         board.getTile((int)coordinates.x, (int)coordinates.y).setMovable(false);   // Target tile is going to be occupied now
                         board.getTile((int)coordinates.x, (int)coordinates.y).setBuildable(false);   // Target tile is going to be occupied now
