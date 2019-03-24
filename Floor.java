@@ -1,4 +1,4 @@
-package mygame;
+package com.jme.mygame;
 
 public enum Floor {
     ZERO(0), GROUND(1), FIRST(2), SECOND(3), DOME(4);

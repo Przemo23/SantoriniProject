@@ -1,4 +1,4 @@
-package mygame;
+package com.jme.mygame;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.collision.CollisionResult;
@@ -12,9 +12,9 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.texture.Texture;
 
-import static mygame.InGameState.BUILDING_PHASE;
-import static mygame.InGameState.MOVEMENT_PHASE;
-import static mygame.InGameState.roundPhase;
+import static com.jme.mygame.InGameState.BUILDING_PHASE;
+import static com.jme.mygame.InGameState.MOVEMENT_PHASE;
+import static com.jme.mygame.InGameState.roundPhase;
 
 public final class Board {
     private AssetManager assetManager;

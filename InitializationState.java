@@ -1,4 +1,4 @@
-package mygame;
+package com.jme.mygame;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
@@ -43,7 +43,17 @@ class InitializationState extends AbstractAppState{
         this.inputManager = this.app.getInputManager();
         this.viewPort = this.app.getViewPort();
         this.cam = this.app.getCamera();
+        ((Game) app).board = new Board((Game) app);
         this.board = ((Game) app).board;
+
+        ((Game) app).player = new Player[((Game) app).getPlayerNumber()];
+        ((Game) app).player[0] = new Player(((Game) app), "Blue");
+        ((Game) app).player[1] = new Player(((Game) app), "Red");
+        if(((Game) app).getPlayerNumber()>=3)
+            ((Game) app).player[2] = new Player(((Game) app), "Green");
+        if(((Game) app).getPlayerNumber()==4)
+            ((Game) app).player[3] = new Player( ((Game) app), "Magenta");
+
         new Scene(assetManager, rootNode, viewPort);
         new CameraControl(cam, board.boardCentre(), inputManager);
         stateManager.attach(((Game) app).bSS);

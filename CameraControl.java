@@ -1,4 +1,4 @@
-package mygame;
+package com.jme.mygame;
 
 import com.jme3.input.ChaseCamera;
 import com.jme3.input.InputManager;

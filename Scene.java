@@ -1,4 +1,4 @@
-package mygame;
+package com.jme.mygame;
 import com.jme3.asset.AssetManager;
 import com.jme3.light.DirectionalLight;
 import com.jme3.math.*;
