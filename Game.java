@@ -25,18 +25,6 @@ public class Game extends SimpleApplication {
         stateManager.attach(mS);
     }
 
-    public void initBoardPlayers()
-    {
-        board = new Board(this);
-        player = new Player[playerNumber];
-        player[0] = new Player(this, "Blue");
-        player[1] = new Player(this, "Red");
-        if(playerNumber>=3)
-            player[2] = new Player(this, "Green");
-        if(playerNumber==4)
-            player[3] = new Player( this, "Magenta");
-    }
-
     public int getPlayerNumber()
     {
         return playerNumber;
