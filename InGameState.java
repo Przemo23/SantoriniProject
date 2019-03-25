@@ -11,11 +11,24 @@ import com.jme3.input.InputManager;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
+
+import com.simsilica.lemur.TextField;
+import com.simsilica.lemur.Button;
+import com.simsilica.lemur.Command;
+import com.simsilica.lemur.Container;
+import com.simsilica.lemur.GuiGlobals;
+import com.simsilica.lemur.Label;
+import com.simsilica.lemur.component.QuadBackgroundComponent;
+import com.simsilica.lemur.component.SpringGridLayout;
+import com.simsilica.lemur.core.GuiControl;
+import com.simsilica.lemur.core.GuiLayout;
+import com.simsilica.lemur.style.BaseStyles;
 
 public class InGameState extends AbstractAppState {
     private SimpleApplication app;
@@ -32,6 +45,8 @@ public class InGameState extends AbstractAppState {
     static final int SELECTION_PHASE = 0;
     static final int MOVEMENT_PHASE = 1;
     static final int BUILDING_PHASE = 2;
+    private TextField turnPanel;
+
     @Override
     public void initialize(AppStateManager stateManager, Application app) { super.initialize(stateManager, app);
         this.app = (Game) app; // can cast Application to something more specific
@@ -44,6 +59,19 @@ public class InGameState extends AbstractAppState {
         this.player = ((Game) app).player;
         this.active = 0;
         this.roundPhase = SELECTION_PHASE;
+
+        QuadBackgroundComponent sth= new QuadBackgroundComponent();
+        sth.setTexture(assetManager.loadTexture("Textures/Textures/CobbleRoad.jpg"));
+        Container textContainer = new Container();
+        textContainer.setLocalTranslation(0.0f,100.0f,0.0f);
+        textContainer.setPreferredSize(new Vector3f(cam.getWidth()/9,cam.getHeight()/15,0.0f));
+        textContainer.setBackground(sth);
+        turnPanel = textContainer.addChild(new TextField("Turn indicator"));
+        turnPanel.setColor(ColorRGBA.Orange);
+        turnPanel.setText("Player " + (active +1)+ "'s turn.");
+
+
+        ((Game) app).getGuiNode().attachChild(textContainer);
         initKeys();
     }
     private void addFunctionality(String mappingName){
@@ -130,4 +158,9 @@ public class InGameState extends AbstractAppState {
             }
 
     };
+    @Override
+    public void update(float fpt)
+    {
+        turnPanel.setText("Player " + (active +1)+ "'s turn.");
+    }
 }

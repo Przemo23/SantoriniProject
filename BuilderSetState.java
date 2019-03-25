@@ -21,6 +21,9 @@ import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Sphere;
+import com.simsilica.lemur.Container;
+import com.simsilica.lemur.TextField;
+import com.simsilica.lemur.component.QuadBackgroundComponent;
 
 public class BuilderSetState extends AbstractAppState {
     private SimpleApplication app;
@@ -34,6 +37,7 @@ public class BuilderSetState extends AbstractAppState {
     private Board board;
     private Player[] player;
     private int buildersCount;
+    private TextField turnPanel;
 
 
     @Override
@@ -50,6 +54,20 @@ public class BuilderSetState extends AbstractAppState {
         phantomBuilder = new Builder(assetManager, "White");
         rootNode.attachChild(phantomBuilder.getBuilderModel());
         buildersCount = 0;
+
+        QuadBackgroundComponent sth= new QuadBackgroundComponent();
+        sth.setTexture(assetManager.loadTexture("Textures/Textures/CobbleRoad.jpg"));
+        Container textContainer = new Container();
+        textContainer.setLocalTranslation(0.0f,100.0f,0.0f);
+        textContainer.setPreferredSize(new Vector3f(cam.getWidth()/9,cam.getHeight()/15,0.0f));
+        textContainer.setBackground(sth);
+        turnPanel = textContainer.addChild(new TextField("Turn indicator"));
+        turnPanel.setColor(ColorRGBA.Orange);
+
+
+
+        ((Game) app).getGuiNode().attachChild(textContainer);
+
         initMark();
         initKeys();
     }
@@ -119,6 +137,7 @@ public class BuilderSetState extends AbstractAppState {
         actionListener = null;
         inputManager.deleteMapping("selectTile");
         rootNode.detachChild(phantomBuilder.getBuilderModel());
+        ((Game) app).getGuiNode().detachAllChildren();
         ((Game) app).iGS = new InGameState();
         stateManager.attach(((Game) app).iGS);
     }
@@ -146,6 +165,7 @@ public class BuilderSetState extends AbstractAppState {
                     if (board.collidingTile(column, row, closest) != null && !board.getTile(column, row).isCompleted())
                         phantomBuilder.getBuilderModel().setLocalTranslation(-52.0f + column*20.0f, 3.0f,-52.0f+row*20.f);
         }
+        turnPanel.setText("Player" + (1 + buildersCount/2)+ "set your builder.");
 
     }
 }
