@@ -17,18 +17,9 @@ import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
-
-import com.simsilica.lemur.TextField;
-import com.simsilica.lemur.Button;
-import com.simsilica.lemur.Command;
 import com.simsilica.lemur.Container;
-import com.simsilica.lemur.GuiGlobals;
-import com.simsilica.lemur.Label;
+import com.simsilica.lemur.TextField;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
-import com.simsilica.lemur.component.SpringGridLayout;
-import com.simsilica.lemur.core.GuiControl;
-import com.simsilica.lemur.core.GuiLayout;
-import com.simsilica.lemur.style.BaseStyles;
 
 public class InGameState extends AbstractAppState {
     private SimpleApplication app;
@@ -69,6 +60,7 @@ public class InGameState extends AbstractAppState {
         turnPanel = textContainer.addChild(new TextField("Turn indicator"));
         turnPanel.setColor(ColorRGBA.Orange);
         turnPanel.setText("Player " + (active +1)+ "'s turn.");
+        turnPanel.setSingleLine(false);
 
 
         ((Game) app).getGuiNode().attachChild(textContainer);
@@ -153,6 +145,7 @@ public class InGameState extends AbstractAppState {
                     selectedBuilder = null;
                     active = (active+1)%(player.length);
                     addFunctionality("selectBuilder");
+                    roundPhase = SELECTION_PHASE;
                 }
             }
             }
@@ -161,6 +154,21 @@ public class InGameState extends AbstractAppState {
     @Override
     public void update(float fpt)
     {
-        turnPanel.setText("Player " + (active +1)+ "'s turn.");
+        switch (roundPhase)
+        {
+            case 0:
+                turnPanel.setText("Player " + (active + 1) + "'s turn." + '\n' + "Select one of your builders");
+                break;
+
+            case 1:
+                turnPanel.setText("Player " + (active + 1) + "'s turn." + '\n' + "Choose where you want to move");
+                break;
+            case 2:
+                turnPanel.setText("Player " + (active + 1) + "'s turn." + '\n' + " Choose the tile on which you want to build.");
+                break;
+
+                default:
+                    break;
+        }
     }
 }
