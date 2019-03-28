@@ -5,9 +5,11 @@ import com.jme3.collision.CollisionResults;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 
-public class BasicRules {
+public interface BasicRules {
 
-    public void move(Board board, Ray ray, CollisionResults results, Builder selected) {
+
+
+    default void move(Board board, Ray ray, CollisionResults results, Builder selected) {
         board.getBoardNode().collideWith(ray, results); // Cursor is going to collide with board tiles
         if(results.size() > 0) // cursor collided with the board
         {
@@ -34,7 +36,7 @@ public class BasicRules {
 
         }
     }
-    public void build(Board board, Ray ray, CollisionResults results, Builder selected) {
+    default Vector2f build(Board board, Ray ray, CollisionResults results, Builder selected) {
         board.getBoardNode().collideWith(ray, results); // Cursor is going to collide with board tiles
         if(results.size() > 0) // cursor collided with the board
         {
@@ -48,15 +50,17 @@ public class BasicRules {
                         board.showAvailableTiles(selected, false);
                         board.buildTile((int)coordinates.x, (int)coordinates.y);
                         selected.setBuilt(true);
-                        break;
+                        Vector2f toReturn = new Vector2f(coordinates.x,coordinates.y);
+                        return toReturn;
                     }
                 }
             }
 
         }
+        return null; // It must be here to avoid an non-return error
     }
 
-    public boolean isWinAccomplished(Builder builder)
+    default boolean isWinAccomplished(Builder builder)
     {
         if(builder.getFloorLvl().equals(Floor.SECOND))
             return true;

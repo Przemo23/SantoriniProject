@@ -165,7 +165,7 @@ public class BuilderSetState extends AbstractAppState {
                     if (board.collidingTile(column, row, closest) != null && !board.getTile(column, row).isCompleted())
                         phantomBuilder.getBuilderModel().setLocalTranslation(-52.0f + column*20.0f, 3.0f,-52.0f+row*20.f);
         }
-        turnPanel.setText("Player" + (1 + buildersCount/2)+ "set your builder.");
+        turnPanel.setText("Player" + (1 + buildersCount/2)+ ", set your builders.");
 
     }
 }

@@ -120,7 +120,7 @@ public class InGameState extends AbstractAppState {
                 player[active].moveBuilder(board, ray, results, selectedBuilder);
                 if(selectedBuilder.hasMoved())
                 {
-                    if(player[active].rules.isWinAccomplished(selectedBuilder))
+                    if(player[active].isWinAccomplished(selectedBuilder))
                     {
                         System.out.println("Player " + (active+1) + " WINS!!!!!");
                         System.exit(1);
@@ -135,7 +135,7 @@ public class InGameState extends AbstractAppState {
             }
 ///////////////// Builder has moved - it is time to build (if possible)
             else if(name.equals("buildPhase") && !keyPressed){
-                player[active].build(board, ray, results, selectedBuilder);
+                player[active].orderBuild(board, ray, results, selectedBuilder);
                 if(selectedBuilder.hasBuilt())
                 {
                     inputManager.addMapping("cancelBuilder", new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
@@ -159,7 +159,6 @@ public class InGameState extends AbstractAppState {
             case 0:
                 turnPanel.setText("Player " + (active + 1) + "'s turn." + '\n' + "Select one of your builders");
                 break;
-
             case 1:
                 turnPanel.setText("Player " + (active + 1) + "'s turn." + '\n' + "Choose where you want to move");
                 break;

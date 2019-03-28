@@ -5,9 +5,9 @@ import com.jme3.collision.CollisionResults;
 import com.jme3.math.Ray;
 import com.jme3.scene.Node;
 
-public class Player  {
+public class Player implements BasicRules {
     Game game;                 // reference to the main file
-    BasicRules rules;          // rules that dictate way of moving, building, checking win condition etc.
+   // BasicRules rules;          // rules that dictate way of moving, building, checking win condition etc.
     Builder male, female;      // each player has two Builder references
     private Node buildersNode; // keeps both builder models (necessary for checking cursor collisions
 
@@ -17,7 +17,7 @@ public class Player  {
         this.buildersNode = new Node("BuildersNode");
         this.male = new Builder(game.getAssetManager(), color);
         this.female = new Builder(game.getAssetManager(), color);
-        this.rules = new BasicRules();
+        //this.rules = new BasicRules();
         game.getRootNode().attachChild(buildersNode);
     }
 
@@ -60,18 +60,18 @@ public class Player  {
     public void  moveBuilder(Board board, Ray ray, CollisionResults collisionResults, Builder builder){
 
         if(builder.getBuilderNode().equals(male.getBuilderNode()))
-            rules.move(board, ray, collisionResults, male);
+            this.move(board, ray, collisionResults, male);
 
         else if(builder.getBuilderNode().equals(female.getBuilderNode()))
-            rules.move(board, ray, collisionResults, female);
+            this.move(board, ray, collisionResults, female);
     }
 
 /** Builds a floor on the selected tile (redirects arguments to the rules.build(....) function) */
-    public void build(Board board, Ray ray, CollisionResults results, Builder builder) {
+    public void orderBuild(Board board, Ray ray, CollisionResults results, Builder builder) {
         if(builder.getBuilderNode().equals(male.getBuilderNode()))
-            rules.build(board, ray, results, male);
+            this.build(board, ray, results, male);
         else if(builder.getBuilderNode().equals(female.getBuilderNode()))
-            rules.build(board, ray, results, female);
+            this.build(board, ray, results, female);
     }
 
 /** After the end of a turn, we reset flags that tell us whether builder has moved/built in this turn (preparation for the next turn) */

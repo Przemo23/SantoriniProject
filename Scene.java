@@ -41,6 +41,8 @@ final class Scene
         // Water
         waterProcessor = new SimpleWaterProcessor(assetManager);
         waterProcessor.setReflectionScene(sceneNode);
+        //waterProcessor.setWaveSpeed(2.0f);
+        //waterProcessor.setDistortionScale(10.0f);
 
         //Adding Sky
         skyNode = new Node("SkyNode");
