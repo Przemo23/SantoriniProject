@@ -85,14 +85,14 @@ public class Player {
     public void resetBuilderPhaseFlags(Builder builder) {
         if(builder.getBuilderNode().equals(male.getBuilderNode()))
         {
-            male.setMoved(false);
-            male.setBuilt(false);
+            male.setWasMoved(false);
+            male.setHasBuilt(false);
         }
 
         else if(builder.getBuilderNode().equals(female.getBuilderNode()))
         {
-            female.setBuilt(false);
-            female.setMoved(false);
+            female.setHasBuilt(false);
+            female.setWasMoved(false);
         }
     }
 }

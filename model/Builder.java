@@ -18,21 +18,23 @@ public class Builder {
 // contains "available" tiles during movement/building phase
     private ArrayList<Vector2f> adjacentTiles;
 // flags
-    private boolean set;
-    private boolean moved;
-    private boolean built;
+    private boolean isSet;
+    private boolean wasMoved;
+    private boolean hasBuilt;
 // set of variables necessary to load builder's model
     private Node builderNode;
     private Geometry builderModel;
     private Material material;
 
+
+
     public Builder(AssetManager assetManager, String color) {
     // 1. preliminary initialization
         floorLVL = Floor.ZERO;
         adjacentTiles = new ArrayList<>();
-        moved = false;
-        built = false;
-        set = false;
+        wasMoved = false;
+        hasBuilt = false;
+        isSet = false;
         builderNode = new Node("BuilderNode");
     // 2. loading builder model
         Box box = new Box(1f, 3f, 1f);
@@ -71,7 +73,7 @@ public class Builder {
     }
 
 /** "Set" flag becomes true after setting builder during the initialization phase */
-    void setEnabled(boolean b) { set = b; }
+    void setEnabled(boolean b) { isSet = b; }
 
 /** Adds a tile which has [column][row] coordinates to the adjacency list (builder can move/build there depending on the phase)  */
     void addAdjacentTile(int column, int row){
@@ -84,7 +86,7 @@ public class Builder {
     }
 
 /** Returns true if a builder was set on the board OR false otherwise*/
-    boolean isSet() { return set; }
+    boolean isSet() { return isSet; }
 
 /** Returns a node which the builder is directly attached to  */
     Node getBuilderNode() { return builderNode;  }
@@ -101,20 +103,20 @@ public class Builder {
     }
 
 /** Flag describing whether */
-    public void setMoved(boolean b){
-        moved = b;
+    public void setWasMoved(boolean b){
+        wasMoved = b;
     }
-    public boolean hasMoved() { return moved;
+    public boolean hasMoved() { return wasMoved;
     }
     public Floor getFloorLvl() { return floorLVL;
     }
     public void setFloorLvl(Floor update){
         floorLVL = update;
     }
-    public void setBuilt(boolean b) {
-        built = b;
+    public void setHasBuilt(boolean b) {
+        hasBuilt = b;
     }
     public boolean hasBuilt() {
-        return built;
+        return hasBuilt;
     }
 }

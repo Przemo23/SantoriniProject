@@ -4,6 +4,7 @@ import model.Board;
 import model.Player;
 
 
+
 public class Game extends SimpleApplication {
 
     public static void main(String[] args) {

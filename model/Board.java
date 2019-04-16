@@ -149,7 +149,7 @@ public final class Board {
         private Node floorsNode;
 
     /** Used to make floors colorful */
-                private AmbientLight floorsLight;
+    private AmbientLight floorsLight;
         private AmbientLight domeLight;
 
     /** Models of buildings  */
