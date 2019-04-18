@@ -2,7 +2,6 @@ package appStates;
 
 
 import com.jme3.app.Application;
-import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
@@ -10,152 +9,112 @@ import com.jme3.collision.CollisionResult;
 import com.jme3.collision.CollisionResults;
 import com.jme3.input.InputManager;
 import com.jme3.input.MouseInput;
-import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.MouseButtonTrigger;
-import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
-import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
-import com.jme3.scene.shape.Sphere;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.TextField;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
+import controler.BuilderSetStateListener;
 import model.Board;
 import model.Builder;
 import model.Player;
 
-public class BuilderSetState extends AbstractAppState {
-    private SimpleApplication app;
-    private Node rootNode;
-    private AssetManager assetManager;
-    private AppStateManager stateManager;
-    private InputManager inputManager;
-    private Camera cam;
-    private Geometry mark;
-    private Builder phantomBuilder;
-    private Board board;
-    private Player[] player;
-    private int buildersCount;
+public class BuilderSetState extends SantoriniState {
+    private BuilderSetStateListener builderSetStateListener;
     private TextField turnPanel;
+    private Builder phantomBuilder;
+    public int buildersCount;
+    private CollisionResult currentTile;
+
 
     @Override
-    public void initialize(AppStateManager stateManager, Application app) {
-        super.initialize(stateManager, app);
-        this.app = (Game) app; // can cast Application to something more specific
-        this.rootNode = this.app.getRootNode();
-        this.assetManager = this.app.getAssetManager();
-        this.stateManager = this.app.getStateManager();
-        this.inputManager = this.app.getInputManager();
-        this.cam = this.app.getCamera();
-        this.board = ((Game) app).board;
-        this.player = ((Game) app).player;
-        phantomBuilder = new Builder(assetManager, "White");
-        rootNode.attachChild(phantomBuilder.getBuilderModel());
-        buildersCount = 0;
-
-        QuadBackgroundComponent sth= new QuadBackgroundComponent();
-        sth.setTexture(assetManager.loadTexture("Textures/Textures/CobbleRoad.jpg"));
-        Container textContainer = new Container();
-        textContainer.setLocalTranslation(0.0f,100.0f,0.0f);
-        textContainer.setPreferredSize(new Vector3f(cam.getWidth()/9,cam.getHeight()/15,0.0f));
-        textContainer.setBackground(sth);
-        turnPanel = textContainer.addChild(new TextField("Turn indicator"));
-        turnPanel.setColor(ColorRGBA.Orange);
-
-
-
-        ((Game) app).getGuiNode().attachChild(textContainer);
-
-        initMark();
-        initKeys();
-    }
-    @Override
-    public void setEnabled(boolean value) {
-        if(!value)
-            actionListener = null;
-    }
-
-    private void initKeys() {
-        inputManager.addMapping("selectTile", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
-        inputManager.addListener(actionListener, "selectTile");
-    }
-
-    private ActionListener actionListener = new ActionListener() {
-        @Override
-        public void onAction(String name, boolean keyPressed, float tpf) {
-            if (name.equals("selectTile") && !keyPressed) {
-                // 1. Reset results list.
-                boolean builderWasSet = false;
-                CollisionResults results = new CollisionResults();
-                Vector2f click2d = inputManager.getCursorPosition().clone();
-                Vector3f click3d = cam.getWorldCoordinates(click2d, 0f).clone();
-                Vector3f dir = cam.getWorldCoordinates(click2d, 1f).subtractLocal(click3d).normalizeLocal();
-                Ray ray = new Ray(click3d, dir);
-                board.getBoardNode().collideWith(ray, results);
-                if (results.size() > 0) {
-                    CollisionResult closest = results.getClosestCollision();
-                    for(int i = 0; i<player.length; i++){
-                        for(int column = 0; column<5; column++){
-                            for(int row = 0; row<5; row++)
-                                if (board.collidingTile(column, row, closest) != null && board.getTile(column, row).isBuildable() &&  board.getTile(column, row).isBuildable() &&!board.getTile(column, row).isCompleted()) {
-                                    if (!player[i].isBuilderSet(player[i].male)) {
-                                        player[i].attachBuilder(player[i].male, column, row);
-                                        System.out.println("Player " + i + " male was set");
-                                        builderWasSet = true;
-                                        buildersCount++;
-                                        break;
-                                    } else if (!player[i].isBuilderSet(player[i].female)) {
-                                        player[i].attachBuilder(player[i].female, column, row);
-                                        System.out.println("Player " + i + " female was set");
-                                        builderWasSet = true;
-                                        buildersCount++;
-                                        break;
-                                    }
-                            }
-                                if(builderWasSet) break;
-                        }
-                        if(builderWasSet) break;
-                    }                      // Let's interact - we mark the hit with a red dot.
-                        mark.setLocalTranslation(closest.getContactPoint());
-                        rootNode.attachChild(mark);
-                        if(buildersCount == 2*player.length) {
-                            System.out.println("Detaching BuilderSetState");
-                            stateManager.detach(BuilderSetState.this);
-                        }
-                }
-                else {
-                    // No hits? Then remove the red mark.
-                    rootNode.detachChild(mark);
-                }
-            }
-        }
-    };
-
-    @Override
-    public void cleanup() {
-        super.cleanup();
-        actionListener = null;
-        inputManager.deleteMapping("selectTile");
-        rootNode.detachChild(phantomBuilder.getBuilderModel());
-        ((Game) app).getGuiNode().detachAllChildren();
-        ((Game) app).iGS = new InGameState();
-        stateManager.attach(((Game) app).iGS);
-    }
-
-    private void initMark() {
-        Sphere sphere = new Sphere(30, 30, 0.2f);
-        mark = new Geometry("BOOM!", sphere);
-        Material mark_mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        mark_mat.setColor("Color", ColorRGBA.Red);
-        mark.setMaterial(mark_mat);
+    public void initialize(AppStateManager stateManager, Application application) {
+        super.initialize(stateManager, application);
+        setClassFields(application);
+        createPhantomBuilder();
+        createTurnIndicator();
+        initializeKeys();
     }
 
     @Override
     public void update(float tpf) {
+        if (cursorPointsBoardTile())
+            updatePhantomBuilderPosition();
+        turnPanel.setText("Player" + (1 + buildersCount / 2) + ", set your builders.");
+    }
+
+    @Override
+    public void setEnabled(boolean value) {
+        if (!value)
+            builderSetStateListener = null;
+    }
+
+    @Override
+    public void cleanup() {
+        super.cleanup();
+        builderSetStateListener = null;
+
+        inputManager.deleteMapping("selectTile");
+
+        rootNode.detachChild(phantomBuilder.getBuilderModel());
+        game.getGuiNode().detachAllChildren();
+        game.inGameState = new InGameState();
+        stateManager.attach(game.inGameState);
+    }
+
+    @Override
+    protected void setClassFields(Application application) {
+        super.setClassFields(application);
+        this.buildersCount = 0;
+        this.builderSetStateListener = new BuilderSetStateListener(this);
+
+    }
+
+    @Override
+    protected void initializeKeys() {
+        inputManager.addMapping("selectTile", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+        inputManager.addListener(builderSetStateListener, "selectTile");
+    }
+
+    private void createPhantomBuilder() {
+        phantomBuilder = new Builder(assetManager, "White");
+        rootNode.attachChild(phantomBuilder.getBuilderModel());
+    }
+
+    private void createTurnIndicator() {
+        QuadBackgroundComponent sth = new QuadBackgroundComponent();
+        sth.setTexture(assetManager.loadTexture("Textures/Textures/CobbleRoad.jpg"));
+        Container textContainer = new Container();
+        textContainer.setLocalTranslation(0.0f, 100.0f, 0.0f);
+        textContainer.setPreferredSize(new Vector3f(cam.getWidth() / 9, cam.getHeight() / 15, 0.0f));
+        textContainer.setBackground(sth);
+        turnPanel = textContainer.addChild(new TextField("Turn indicator"));
+        turnPanel.setColor(ColorRGBA.Orange);
+        game.getGuiNode().attachChild(textContainer);
+    }
+
+    private void updatePhantomBuilderPosition() {
+        for (int column = 0; column < 5; column++)
+            for (int row = 0; row < 5; row++)
+                if (isTileOccupable(column, row))
+                    updatePhantomBuilder(column, row);
+    }
+
+    private void updatePhantomBuilder(int column, int row) {
+        phantomBuilder.getBuilderModel().setLocalTranslation(-52.0f + column * 20.0f, 3.0f, -52.0f + row * 20.f);
+    }
+
+    private boolean isTileOccupable(int column, int row) {
+        return board.collidingTile(column, row, currentTile) != null &&
+               !board.getTile(column, row).isCompleted() ;
+    }
+
+    private boolean cursorPointsBoardTile() {
         CollisionResults results = new CollisionResults();
         Vector2f click2d = inputManager.getCursorPosition().clone();
         Vector3f click3d = cam.getWorldCoordinates(click2d, 0f).clone();
@@ -163,13 +122,10 @@ public class BuilderSetState extends AbstractAppState {
         Ray ray = new Ray(click3d, dir);
         board.getBoardNode().collideWith(ray, results);
         if (results.size() > 0) {
-            CollisionResult closest = results.getClosestCollision();
-            for(int column = 0; column<5; column++)
-                for(int row = 0; row<5; row++)
-                    if (board.collidingTile(column, row, closest) != null && !board.getTile(column, row).isCompleted())
-                        phantomBuilder.getBuilderModel().setLocalTranslation(-52.0f + column*20.0f, 3.0f,-52.0f+row*20.f);
+            currentTile = results.getClosestCollision();
+            return true;
         }
-        turnPanel.setText("Player" + (1 + buildersCount/2)+ ", set your builders.");
-
+        return false;
     }
 }
+

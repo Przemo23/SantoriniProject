@@ -29,26 +29,33 @@ public final class Scene
         assetManager = importedManager;
         sceneNode = new Node("SceneNode");
 
-        createWater(nodeToAttach,viewPort);
-        createSky();
-        createLight(nodeToAttach);
 
+
+        // Terrain initialization
         terrain = assetManager.loadModel("Scenes/Terrain.j3o");
+
+       // terrain.setMaterial(matTerrain);
         terrain.setLocalTranslation(-60, -50, -85);
         sceneNode.attachChild(terrain);
 
-        nodeToAttach.attachChild(sceneNode);
-
-    }
-    private void createWater(Node nodeToAttach, ViewPort viewPort)
-    {
+        // Water
         waterProcessor = new SimpleWaterProcessor(assetManager);
         waterProcessor.setReflectionScene(sceneNode);
+        //waterProcessor.setWaveSpeed(2.0f);
+        //waterProcessor.setDistortionScale(10.0f);
+
+        //Adding Sky
+        skyNode = new Node("SkyNode");
+        skyNode.attachChild(SkyFactory.createSky(assetManager, "Textures/TestSky2.jpg", SphereMap));
+        skyNode.rotate(FastMath.PI/2,0.0f,0.0f);
+        sceneNode.attachChild(skyNode);
+
 
         Vector3f waterLocation=new Vector3f(0,-6,0);
         waterProcessor.setPlane(new Plane(UNIT_Y, waterLocation.dot(UNIT_Y)));
         viewPort.addProcessor(waterProcessor);
         waterProcessor.setWaterColor(ColorRGBA.Blue);
+
 
         Quad quad = new Quad(2048,2048);
         quad.scaleTextureCoordinates(new Vector2f(6f,6f));
@@ -59,20 +66,14 @@ public final class Scene
         water.setShadowMode(ShadowMode.Receive);
         water.setMaterial(waterProcessor.getMaterial());
         nodeToAttach.attachChild(water);
-    }
-    private void createSky()
-    {
-        skyNode = new Node("SkyNode");
-        skyNode.attachChild(SkyFactory.createSky(assetManager, "Textures/TestSky2.jpg", SphereMap));
-        skyNode.rotate(FastMath.PI/2,0.0f,0.0f);
-        sceneNode.attachChild(skyNode);
-    }
-    private void createLight(Node nodeToAttach)
-    {
         DirectionalLight sun = new DirectionalLight();
         sun.setDirection(new Vector3f(1,-1,-2).normalizeLocal());
         sun.setColor(ColorRGBA.White);
         nodeToAttach.addLight(sun);
+
+
+        nodeToAttach.attachChild(sceneNode);
+
     }
 
 }

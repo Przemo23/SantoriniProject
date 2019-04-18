@@ -11,7 +11,7 @@ import gods.BasicRules;
 public class Player {
     Game game;                 // reference to the main file
    // BasicRules rules;          // rules that dictate way of moving, building, checking win condition etc.
-    public Builder male, female;      // each player has two Builder references
+    public Builder male, female;      // each players has two Builder references
     private Node buildersNode; // keeps both builder models (necessary for checking cursor collisions
     private BasicRules rules;
     public Player(Game game, String color) {
@@ -25,7 +25,7 @@ public class Player {
         rules = new BasicRules();
     }
 
-/** Returns true if male/female builder of a player was set OR false if not */
+/** Returns true if male/female builder of a players was set OR false if not */
     public boolean isBuilderSet(Builder builder) {
     return builder.isSet();
 }
@@ -85,14 +85,14 @@ public class Player {
     public void resetBuilderPhaseFlags(Builder builder) {
         if(builder.getBuilderNode().equals(male.getBuilderNode()))
         {
-            male.setWasMoved(false);
-            male.setHasBuilt(false);
+            male.setMoved(false);
+            male.setBuilt(false);
         }
 
         else if(builder.getBuilderNode().equals(female.getBuilderNode()))
         {
-            female.setHasBuilt(false);
-            female.setWasMoved(false);
+            female.setBuilt(false);
+            female.setMoved(false);
         }
     }
 }

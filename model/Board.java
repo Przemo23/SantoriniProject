@@ -2,7 +2,9 @@ package model;
 
 import appStates.Game;
 import com.jme3.asset.AssetManager;
+import com.jme3.collision.Collidable;
 import com.jme3.collision.CollisionResult;
+import com.jme3.collision.CollisionResults;
 import com.jme3.light.AmbientLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
@@ -80,7 +82,7 @@ public final class Board {
 /** Returns a tile (a Spatial) in the exact middle of the board */
     public Spatial boardCentre() {return tiles[2][2].tile;}
 
-/** Builds up a tile that was selected by a player during the building phase */
+/** Builds up a tile that was selected by a players during the building phase */
     public void buildTile(int column, int row) { tiles[column][row].buildUp(); }
 
 /** Shows tiles available to enter by the builder during the movement phase */
@@ -132,7 +134,7 @@ public final class Board {
 
 
  /* This is an inner class describing each board tile from 25 tiles */
-     public class BoardTile {
+     public class BoardTile extends CollisionResult {
 
     /** Basic info about a tile */
         private int tileColumn;
@@ -149,7 +151,7 @@ public final class Board {
         private Node floorsNode;
 
     /** Used to make floors colorful */
-    private AmbientLight floorsLight;
+                private AmbientLight floorsLight;
         private AmbientLight domeLight;
 
     /** Models of buildings  */

@@ -4,7 +4,6 @@ import model.Board;
 import model.Player;
 
 
-
 public class Game extends SimpleApplication {
 
     public static void main(String[] args) {
@@ -12,10 +11,12 @@ public class Game extends SimpleApplication {
         app.start();
     }
 
-    MenuState mS = new MenuState();
-    InitializationState iS = new InitializationState();
-    BuilderSetState bSS = new BuilderSetState();
-    InGameState iGS;
+    //States
+    MenuState menuState = new MenuState();
+    InitializationState initializationState = new InitializationState();
+    BuilderSetState builderSetState = new BuilderSetState();
+    InGameState inGameState;
+    //Others
     Player[] player;
     public Board board;
     private int playerNumber;
@@ -23,17 +24,15 @@ public class Game extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
-
-        stateManager.attach(mS);
-
+        stateManager.attach(menuState);
     }
 
-    public int getPlayerNumber()
+    int getPlayerNumber()
     {
         return playerNumber;
     }
 
-    public void setPlayerNumber(int n)
+    void setPlayerNumber(int n)
     {
         playerNumber = n;
     }

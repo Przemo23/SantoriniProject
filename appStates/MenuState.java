@@ -108,8 +108,8 @@ public class MenuState extends AbstractAppState {
                 System.out.println("The world is yours.");
                 stateManager.cleanup();
                 ((Game) app).setPlayerNumber( 2);
-                stateManager.attach(((Game) app).iS);
-                stateManager.detach(((Game) app).mS);
+                stateManager.attach(((Game) app).initializationState);
+                stateManager.detach(((Game) app).menuState);
             }
         });
 
@@ -120,8 +120,8 @@ public class MenuState extends AbstractAppState {
                 System.out.println("The world is yours.");
                 ((Game) app).setPlayerNumber( 3);
                 stateManager.cleanup();
-                stateManager.attach(((Game) app).iS);
-                stateManager.detach(((Game) app).mS);
+                stateManager.attach(((Game) app).initializationState);
+                stateManager.detach(((Game) app).menuState);
             }
         });
 
@@ -131,8 +131,8 @@ public class MenuState extends AbstractAppState {
                 System.out.println("The world is yours.");
                 ((Game) app).setPlayerNumber( 4);
                 stateManager.cleanup();
-                stateManager.attach(((Game) app).iS);
-                stateManager.detach(((Game) app).mS);
+                stateManager.attach(((Game) app).initializationState);
+                stateManager.detach(((Game) app).menuState);
 
             }
         });

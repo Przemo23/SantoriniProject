@@ -12,7 +12,7 @@ import model.Player;
 public interface PlayerCreator {
     default void createPlayers(Game app, Board board) {
         String playerColor;
-        for(int i=0; i<((Game)app).player.length;i++) {
+        for(int i=0; i<((Game)app).players.length;i++) {
             if(i == 0)
                 playerColor = "Blue";
             else if(i==1)
@@ -29,7 +29,7 @@ public interface PlayerCreator {
             {
                 case Pan:
                     System.out.println("Player " + (i+1)+ " is Pan.");
-                    ((Game) app).player[i] = new Player(((Game) app), playerColor) {
+                    ((Game) app).players[i] = new Player(((Game) app), playerColor) {
 
                         int previousHeight = 0;
                         @Override
@@ -48,7 +48,7 @@ public interface PlayerCreator {
 
                 case Chronos:
                     System.out.println("Player " +( i+1)+ " is Chronos.");
-                    ((Game) app).player[i] = new Player(((Game) app), playerColor) {
+                    ((Game) app).players[i] = new Player(((Game) app), playerColor) {
 
 
                         @Override
@@ -74,7 +74,7 @@ public interface PlayerCreator {
                     break;
                 case Artemis:
                     System.out.println("Player " + (i+1)+ " is Artemis.");
-                    ((Game) app).player[i] = new Player(((Game) app), playerColor) {
+                    ((Game) app).players[i] = new Player(((Game) app), playerColor) {
                         boolean afterFirstMove = false;
                         @Override
                         public void move(Board board, Ray ray, CollisionResults results, Builder selected) {
@@ -94,7 +94,7 @@ public interface PlayerCreator {
                     break;
                  case Hephaestus:
                     System.out.println("Player " + (i+1)+ " is Hephaestus.");
-                    ((Game) app).player[i] = new Player(((Game) app), playerColor) {
+                    ((Game) app).players[i] = new Player(((Game) app), playerColor) {
 
                         @Override
                         public Vector2f build(Board board, Ray ray, CollisionResults results, Builder selected) {
@@ -108,7 +108,7 @@ public interface PlayerCreator {
                     };
                     break;
                 default:
-                    ((Game) app).player[i] = new Player(((Game) app), playerColor);
+                    ((Game) app).players[i] = new Player(((Game) app), playerColor);
                     break;
 
             }
