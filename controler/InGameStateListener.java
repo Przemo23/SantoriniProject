@@ -8,6 +8,7 @@ import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import model.Builder;
+import model.showTilesMode;
 
 import static appStates.InGameState.BUILDING_PHASE;
 import static appStates.InGameState.MOVEMENT_PHASE;
@@ -75,8 +76,9 @@ public class InGameStateListener extends SantoriniActionListener {
         inputManager.deleteMapping("cancelBuilder");
         inputManager.deleteMapping("moveBuilder");
         addFunctionality("buildPhase", MouseInput.BUTTON_LEFT);
-        board.showAvailableTiles(selectedBuilder, true);
         roundPhase = BUILDING_PHASE;
+        board.showAvailableTiles(selectedBuilder, showTilesMode.showTiles);
+
     }
 
     private void checkWinCondition() {
@@ -91,7 +93,7 @@ public class InGameStateListener extends SantoriniActionListener {
     }
 
     private void cancelSelectedBuilder() {
-        board.showAvailableTiles(selectedBuilder, false); //hide available tiles
+        board.showAvailableTiles(selectedBuilder, showTilesMode.hideTiles); //hide available tiles
         selectedBuilder = null; // builder is canceled
         inputManager.deleteMapping("moveBuilder");
         roundPhase = SELECTION_PHASE;
@@ -104,14 +106,14 @@ public class InGameStateListener extends SantoriniActionListener {
     private void selectBuilderToMove() {
         roundPhase = MOVEMENT_PHASE;
         selectedBuilder = players[active].collidingBuilder(closestCursorCollision);
-        board.showAvailableTiles(selectedBuilder, true);
+        board.showAvailableTiles(selectedBuilder, showTilesMode.showTiles);
 
         if (!inputManager.hasMapping("moveBuilder"))
             addFunctionality("moveBuilder", MouseInput.BUTTON_LEFT);
     }
 
     private void removeTilesAvailableForPreviousBuilder() {
-        board.showAvailableTiles(selectedBuilder, false);
+        board.showAvailableTiles(selectedBuilder, showTilesMode.hideTiles);
     }
 
     private boolean playerSwitchesBetweenBuilders() {

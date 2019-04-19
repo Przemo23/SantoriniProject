@@ -7,6 +7,7 @@ import com.jme3.math.Vector2f;
 import model.Board;
 import model.Builder;
 import model.Floor;
+import model.showTilesMode;
 
 public class BasicRules {
 
@@ -21,7 +22,7 @@ public class BasicRules {
                 if(target != null){
                     if(target.getCoordinates().equals(coordinates)) //if target tile matches one of available tiles (by height difference and being occupied)
                     {
-                        board.showAvailableTiles(selected, false);
+                        board.showAvailableTiles(selected, showTilesMode.hideTiles);
                         board.getTile(selected.getColumn(), selected.getRow()).setMovable(true); // Current tile is no longer occupied
                         board.getTile(selected.getColumn(), selected.getRow()).setBuildable(true); // Current tile is no longer occupied
                         selected.setFloorLvl(target.getHeight());
@@ -48,7 +49,7 @@ public class BasicRules {
                 if(target != null){
                     if(target.getCoordinates().equals(coordinates)) //if target tile matches one of available tiles (by height difference and being occupied)
                     {
-                        board.showAvailableTiles(selected, false);
+                        board.showAvailableTiles(selected, showTilesMode.hideTiles);
                         board.buildTile((int)coordinates.x, (int)coordinates.y);
                         selected.setBuilt(true);
                         return new Vector2f(coordinates.x,coordinates.y);

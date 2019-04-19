@@ -2,9 +2,7 @@ package model;
 
 import appStates.Game;
 import com.jme3.asset.AssetManager;
-import com.jme3.collision.Collidable;
 import com.jme3.collision.CollisionResult;
-import com.jme3.collision.CollisionResults;
 import com.jme3.light.AmbientLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
@@ -15,9 +13,7 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.texture.Texture;
 
-import static appStates.InGameState.BUILDING_PHASE;
-import static appStates.InGameState.MOVEMENT_PHASE;
-import static appStates.InGameState.roundPhase;
+import static appStates.InGameState.*;
 
 public final class Board {
     private AssetManager assetManager;
@@ -86,50 +82,58 @@ public final class Board {
     public void buildTile(int column, int row) { tiles[column][row].buildUp(); }
 
 /** Shows tiles available to enter by the builder during the movement phase */
-    public void showAvailableTiles(Builder selected, boolean bool){
-    // iterators
-        int tempColumn ;
-        int tempRow ;
-    // textures that we are about to switch
-        Texture tileHighlighted = assetManager.loadTexture("Textures/Terrain/Selected.jpg");
-        Texture tileSwitchedOff = assetManager.loadTexture("Textures/Terrain/Grass.jpg");
+    public void showAvailableTiles(Builder selected, showTilesMode mode)
+    {
     //case 1: we remove tiles that were available in a previous phase
-        if(!bool)
+        if(mode == showTilesMode.hideTiles)
+            hideAllAdjacentTiles(selected);
+        else // mode == showTilesMode.showTiles, case 2: we are checking every single adjacent tile around the builder
+            showAllAdjacentTiles(selected);
+    }
+    private void hideAllAdjacentTiles(Builder selected)
+    {
+        Texture tileSwitchedOff = assetManager.loadTexture("Textures/Terrain/Grass.jpg");
+        for(Vector2f coordinates : selected.getAdjacentTiles())
+            tiles[(int)coordinates.x][(int)coordinates.y].tileMat.setTexture("ColorMap", tileSwitchedOff);
+        selected.removeAdjacentTiles();
+    }
+    private void showAllAdjacentTiles(Builder selected)
+    {
+        int tempColumn, tempRow ;
+        Texture tileHighlighted = assetManager.loadTexture("Textures/Terrain/Selected.jpg");
+        for(tempColumn = selected.getColumn() - 1; tempColumn <= selected.getColumn() + 1; tempColumn++)
         {
-            for(Vector2f coordinates : selected.getAdjacentTiles())
-                tiles[(int)coordinates.x][(int)coordinates.y].tileMat.setTexture("ColorMap", tileSwitchedOff);
-            selected.removeAdjacentTiles();
-        }
-    // case 2: we are checking every single adjacent tile around the builder
-       else
-        {
-            for(tempColumn = selected.getColumn() - 1; tempColumn <= selected.getColumn() + 1; tempColumn++)
+            // allows to avoid ArrayIndexOutOfBoundsException
+            if(tempColumn<0 || tempColumn > 4)
+                continue;
+            for(tempRow = selected.getRow() - 1; tempRow <= selected.getRow() + 1; tempRow++)
             {
-                // allows to avoid ArrayIndexOutOfBoundsException
-                if(tempColumn<0 || tempColumn > 4)
+                // as above
+                if(tempRow<0 || tempRow > 4)
                     continue;
-                for(tempRow = selected.getRow() - 1; tempRow <= selected.getRow() + 1; tempRow++)
+                if(canWeBuildHere(tiles[tempColumn][tempRow]) )
                 {
-                    // as above
-                    if(tempRow<0 || tempRow > 4)
-                        continue;
-                    // a case during movement phase
-                    if(roundPhase == MOVEMENT_PHASE && !tiles[tempColumn][tempRow].isCompleted() && tiles[tempColumn][tempRow].isMovable()
-                            && tiles[tempColumn][tempRow].getHeight().height - selected.getFloorLvl().height < 2 )
-                    {
-                        tiles[tempColumn][tempRow].tileMat.setTexture("ColorMap", tileHighlighted);
-                        selected.addAdjacentTile(tempColumn, tempRow);
-                    }
-                    // a case during building phase (might be different from the movement phase depending on god powers
-                    else if(!tiles[tempColumn][tempRow].isCompleted() && tiles[tempColumn][tempRow].isBuildable() && roundPhase == BUILDING_PHASE)
-                    {
-                        tiles[tempColumn][tempRow].tileMat.setTexture("ColorMap", tileHighlighted);
-                        selected.addAdjacentTile(tempColumn, tempRow);
-                    }
+                    tiles[tempColumn][tempRow].tileMat.setTexture("ColorMap", tileHighlighted);
+                    selected.addAdjacentTile(tempColumn, tempRow);
+                }
+                else if(canWeMoveHere(tiles[tempColumn][tempRow],selected))
+                {
+                    tiles[tempColumn][tempRow].tileMat.setTexture("ColorMap", tileHighlighted);
+                    selected.addAdjacentTile(tempColumn, tempRow);
                 }
             }
+
         }
-}
+    }
+    private boolean canWeBuildHere(BoardTile tile)
+    {
+        return !tile.isCompleted() && tile.isBuildable() && roundPhase == BUILDING_PHASE;
+    }
+    private boolean canWeMoveHere(BoardTile tile,Builder selected)
+    {
+        return roundPhase == MOVEMENT_PHASE && !tile.isCompleted() && tile.isMovable() && tile.getHeight().height - selected.getFloorLvl().height < 2;
+    }
+
 
 
 
@@ -174,12 +178,24 @@ public final class Board {
             tileNode = new Node("TileNode");
             domeNode = new Node("DomeNode");
             floorsNode = new Node("FloorsNode");
-        // 4. Initializing lights that highlight buildings
+
+            setUpLights();
+            loadBoardModel(assetManager,column,row);
+            loadBlockModels(assetManager,column,row);
+        // 4. Attaching nodes to the world
+            tileNode.attachChild(tile);
+            tileNode.attachChild(floorsNode);
+            tileNode.attachChild(domeNode);
+        }
+        private void setUpLights()
+        {
             floorsLight = new AmbientLight();
             floorsLight.setColor(ColorRGBA.White.mult(0.6f));
             domeLight = new AmbientLight();
             domeLight.setColor(ColorRGBA.Blue.mult(0.7f));
-        // 5. Loading a board tile model and texture
+        }
+        private void loadBoardModel(AssetManager assetManager,int column, int row)
+        {
             Box tileShape = new Box(10.0f, 0.1f, 10.0f);
             tile = new Geometry("Tile", tileShape);
             tileMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -187,7 +203,9 @@ public final class Board {
             tileMat.setTexture("ColorMap", tileTexture);
             tile.setMaterial(tileMat);
             tile.setLocalTranslation(-51.5f + 20*column, 0.0f, -51.5f + 20*row);
-        // 6. Loading all floor models
+        }
+        private void loadBlockModels(AssetManager assetManager, int column, int row)
+        {
             ground = assetManager.loadModel("Models/Floors/Ground.j3o");
             first = assetManager.loadModel("Models/Floors/First.j3o");
             second = assetManager.loadModel("Models/Floors/Second.j3o");
@@ -200,10 +218,6 @@ public final class Board {
             second.setLocalScale(3.0f);
             dome.setLocalTranslation(-52.0f+column*20.0f,21.0f,-52.0f+row*20.0f);
             dome.setLocalScale(6.0f);
-        // 7. Attaching nodes to the world
-            tileNode.attachChild(tile);
-            tileNode.attachChild(floorsNode);
-            tileNode.attachChild(domeNode);
         }
 
         private void makeColored() { floorsNode.addLight(floorsLight); domeNode.addLight(domeLight); }
