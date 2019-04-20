@@ -2,35 +2,38 @@ package com.jme.mygame;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.collision.CollisionResult;
-import com.jme3.collision.CollisionResults;
+import com.jme3.light.AmbientLight;
 import com.jme3.material.Material;
+import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector2f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.texture.Texture;
 
-public final class Board {
-    private float TILE_LENGTH = 10.0f;
-    private float TILE_WIDTH = 10.0f;
-    private float TILE_HEIGHT = 0.1f;
-    private AssetManager assetManager;
-    private Spatial boardFrame;
-    private Node tilesNode;
-    private Node boardNode;
-    BoardTile tiles[][];
+import static com.jme.mygame.InGameState.BUILDING_PHASE;
+import static com.jme.mygame.InGameState.MOVEMENT_PHASE;
+import static com.jme.mygame.InGameState.roundPhase;
 
-    public Board(Game game)
-    {
-        tilesNode = new Node("Tiles");
-        boardNode = new Node("Board");
-        tiles = new BoardTile[5][5];
-        assetManager = game.getAssetManager();
-        boardFrame = assetManager.loadModel("Models/Board/Board.j3o");
-        boardFrame.setLocalTranslation(-23.0f, 0.1f, -3.0f);
+public final class Board {
+    private AssetManager assetManager;
+    private Node tilesNode;             // every single board tile is attached to it
+    private Node boardNode;             // includes tilesNode and board frame
+    private BoardTile tiles[][];
+
+    Board(Game game) {
+        // 1. preliminary initialization
+        this.tilesNode = new Node("Tiles");
+        this.boardNode = new Node("Board");
+        this.tiles = new BoardTile[5][5];
+        this.assetManager = game.getAssetManager();
+        // 2. loading board frame model
+        Spatial boardFrame = assetManager.loadModel("Models/Board/Board.j3o");
+        boardFrame.setLocalTranslation(-21.5f, 0.1f, -1.5f);
         boardFrame.setLocalScale(20.0f);
         boardNode.attachChild(boardFrame);
-
+        // 3. loading board tiles
         for(byte column = 0; column<5; column++)
             for(byte row = 0; row<5; row++)
             {
@@ -38,57 +41,150 @@ public final class Board {
                 tilesNode.attachChild(tiles[column][row].tileNode);
             }
         boardNode.attachChild(tilesNode);
+        // 4. final attachment of the clear board to the world
+        highlightBoard();
         attachBoard(game.getRootNode());
     }
 
+    private void highlightBoard() {
+        for(int i = 0; i<5; i++)
+            for(int j = 0; j<5; j++)
+                tiles[i][j].makeColored();
+    }
 
-    private void attachBoard(Node node)
-    {
+    private void attachBoard(Node node){
         node.attachChild(boardNode);
     }
-    public Node getBoardNode() { return tilesNode; }
-    public void buildTile(int column, int row) { tiles[column][row].buildUp(); }
-    public boolean tileCollides(int column, int row, CollisionResult collisionResult)
+
+/** Returns a board tile that a mouse cursor collides with OR returns null if the click missed the board */
+    public BoardTile collidingTile(int column, int row, CollisionResult collisionResult) {
+    Node n = collisionResult.getGeometry().getParent();
+    while(n.getParent() != null)
     {
-        Node n = collisionResult.getGeometry().getParent();
-        while(n.getParent() != null)
-        {
-            if(n.equals(tiles[column][row].tileNode))
-                return true;
-            n = n.getParent();
-        }
-        return false;
+        if(n.equals(tiles[column][row].tileNode))
+            return tiles[column][row];
+        n = n.getParent();
     }
+    return null;
+}
 
+/** Returns a board tile which location is defined by "column" and "row" indexes in a 5x5 matrix */
+    public BoardTile getTile(int column, int row) {
+    return tiles[column][row]; }
 
-    /* This is an inner class describing each board tile from 25 tiles */
-    class BoardTile {
+/** Actually it returns a tilesNode */
+    public Node getBoardNode() {
+    return tilesNode; }
 
-        Node tileNode;
-        Spatial tile;
-        private Material tileMat;
-        private Spatial ground, first, second, dome;
-        private Texture tileTexture;
-        private Floor height;
-        private boolean occupied;
-        private int rowCoord;
-        private int columnCoord;
+/** Returns a tile (a Spatial) in the exact middle of the board */
+    public Spatial boardCentre() {return tiles[2][2].tile;}
 
-        public BoardTile(int column, int row)
+/** Builds up a tile that was selected by a player during the building phase */
+    public void buildTile(int column, int row) { tiles[column][row].buildUp(); }
+
+/** Shows tiles available to enter by the builder during the movement phase */
+    public void showAvailableTiles(Builder selected, boolean bool){
+    // iterators
+        int tempColumn ;
+        int tempRow ;
+    // textures that we are about to switch
+        Texture tileHighlighted = assetManager.loadTexture("Textures/Terrain/Selected.jpg");
+        Texture tileSwitchedOff = assetManager.loadTexture("Textures/Terrain/Grass.jpg");
+    //case 1: we remove tiles that were available in a previous phase
+        if(!bool)
         {
+            for(Vector2f coordinates : selected.getAdjacentTiles())
+                tiles[(int)coordinates.x][(int)coordinates.y].tileMat.setTexture("ColorMap", tileSwitchedOff);
+            selected.removeAdjacentTiles();
+        }
+    // case 2: we are checking every single adjacent tile around the builder
+       else
+        {
+            for(tempColumn = selected.getColumn() - 1; tempColumn <= selected.getColumn() + 1; tempColumn++)
+            {
+                // allows to avoid ArrayIndexOutOfBoundsException
+                if(tempColumn<0 || tempColumn > 4)
+                    continue;
+                for(tempRow = selected.getRow() - 1; tempRow <= selected.getRow() + 1; tempRow++)
+                {
+                    // as above
+                    if(tempRow<0 || tempRow > 4)
+                        continue;
+                    // a case during movement phase
+                    if(roundPhase == MOVEMENT_PHASE && !tiles[tempColumn][tempRow].isCompleted() && tiles[tempColumn][tempRow].isMovable()
+                            && tiles[tempColumn][tempRow].getHeight().height - selected.getFloorLvl().height < 2 )
+                    {
+                        tiles[tempColumn][tempRow].tileMat.setTexture("ColorMap", tileHighlighted);
+                        selected.addAdjacentTile(tempColumn, tempRow);
+                    }
+                    // a case during building phase (might be different from the movement phase depending on god powers
+                    else if(!tiles[tempColumn][tempRow].isCompleted() && tiles[tempColumn][tempRow].isBuildable() && roundPhase == BUILDING_PHASE)
+                    {
+                        tiles[tempColumn][tempRow].tileMat.setTexture("ColorMap", tileHighlighted);
+                        selected.addAdjacentTile(tempColumn, tempRow);
+                    }
+                }
+            }
+        }
+}
+
+
+
+ /* This is an inner class describing each board tile from 25 tiles */
+     class BoardTile {
+
+    /** Basic info about a tile */
+        private int tileColumn;
+        private int tileRow;
+        private Floor height;
+
+    /** Flags describing tile's availability in certain round phases */
+        private boolean completed; // true when a full building stands on a tile
+        private boolean movable;   // true
+        private boolean buildable; //
+
+        private Node tileNode;
+        private Node domeNode;
+        private Node floorsNode;
+
+    /** Used to make floors colorful */
+        private AmbientLight floorsLight;
+        private AmbientLight domeLight;
+
+    /** Models of buildings  */
+        private Spatial ground, first, second, dome;
+        private Spatial tile;
+        private Material tileMat;
+        private Texture tileTexture;
+
+
+        public BoardTile(int column, int row) {
+        // 1. Initializing basic info
+            tileColumn = column;
+            tileRow = row;
             height = Floor.ZERO;
-            occupied = false;
-            columnCoord = column;
-            rowCoord = row;
+        // 2. Setting preliminary flags values
+            completed = false;
+            buildable = true;
+            movable = true;
+        // 3. Initializing necessary nodes
             tileNode = new Node("TileNode");
-            Box tileShape = new Box(TILE_LENGTH, TILE_HEIGHT, TILE_WIDTH);
+            domeNode = new Node("DomeNode");
+            floorsNode = new Node("FloorsNode");
+        // 4. Initializing lights that highlight buildings
+            floorsLight = new AmbientLight();
+            floorsLight.setColor(ColorRGBA.White.mult(0.6f));
+            domeLight = new AmbientLight();
+            domeLight.setColor(ColorRGBA.Blue.mult(0.7f));
+        // 5. Loading a board tile model and texture
+            Box tileShape = new Box(10.0f, 0.1f, 10.0f);
             tile = new Geometry("Tile", tileShape);
             tileMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
             tileTexture = assetManager.loadTexture("Textures/Terrain/Grass.jpg");
             tileMat.setTexture("ColorMap", tileTexture);
             tile.setMaterial(tileMat);
-            tile.setLocalTranslation(-53.0f + 20*column, 0.0f, -53.0f + 20*row);
-            tileNode.attachChild(tile);
+            tile.setLocalTranslation(-51.5f + 20*column, 0.0f, -51.5f + 20*row);
+        // 6. Loading all floor models
             ground = assetManager.loadModel("Models/Floors/Ground.j3o");
             first = assetManager.loadModel("Models/Floors/First.j3o");
             second = assetManager.loadModel("Models/Floors/Second.j3o");
@@ -101,36 +197,75 @@ public final class Board {
             second.setLocalScale(3.0f);
             dome.setLocalTranslation(-52.0f+column*20.0f,21.0f,-52.0f+row*20.0f);
             dome.setLocalScale(6.0f);
+        // 7. Attaching nodes to the world
+            tileNode.attachChild(tile);
+            tileNode.attachChild(floorsNode);
+            tileNode.attachChild(domeNode);
         }
 
-        public boolean isOccupied(){
-            return occupied;
-        }
+        private void makeColored() { floorsNode.addLight(floorsLight); domeNode.addLight(domeLight); }
+
+        private void buildUp() {
+         if(height == Floor.ZERO)
+         {
+             floorsNode.attachChild(ground);
+             height = Floor.GROUND;
+         }
+         else if(height == Floor.GROUND)
+         {
+             height = Floor.FIRST;
+             floorsNode.attachChild(first);
+         }
+         else if(height == Floor.FIRST)
+         {
+             height = Floor.SECOND;
+             floorsNode.attachChild(second);
+         }
+         else if(height == Floor.SECOND)
+         {
+             height = Floor.DOME;
+             domeNode.attachChild(dome);
+             completed = true;
+             movable = false;
+             buildable = false;
+         }
+     }
+
+
+     /** Returns height of a building - 0 is GROUND, 1 is FIRST etc. */
         public Floor getHeight(){
-            return height;
+         return height;
+     }
+
+     /** Returns a Vector2f with tile's matrix coordinates. "x" is a column coordinate, "y" is a row coordinate */
+        public Vector2f getCoordinates() {
+         return new Vector2f(tileColumn, tileRow);
+     }
+
+     /** Returns true when a building is completed */
+        public boolean isCompleted(){
+            return completed;
         }
-        public void buildUp()
-        {
-            if(height == Floor.ZERO)
-            {
-                tileNode.attachChild(ground);
-                height = Floor.GROUND;
-            }
-            else if(height == Floor.GROUND)
-            {
-                height = Floor.FIRST;
-                tileNode.attachChild(first);
-            }
-            else if(height == Floor.FIRST)
-            {
-                height = Floor.SECOND;
-                tileNode.attachChild(second);
-            }
-            else if(height == Floor.SECOND)
-            {
-                height = Floor.DOME;
-                tileNode.attachChild(dome);
-            }
-        }
-    }
+
+    /** Returns true when a builder is able to enter a tile */
+        public boolean isBuildable() {
+             return buildable;
+         }
+
+    /** Returns true when a builder is able to build on a tile */
+        public boolean isMovable() {
+             return movable;
+         }
+
+    /** Enables or disables tile's "buildability" */
+        public void setBuildable(boolean b) {
+                buildable = b;
+         }
+
+    /** Enables or disables a possibility to enter a certain tile */
+        public void setMovable(boolean b){
+                movable = b;
+         }
+
+ }
 }
