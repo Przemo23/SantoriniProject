@@ -1,7 +1,6 @@
 package appStates;
 
 import com.jme3.app.Application;
-
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.app.state.AbstractAppState;
@@ -30,7 +29,9 @@ public class MenuState extends AbstractAppState {
     private Camera cam;
     private float windowHeight, windowWidth;
     private float tabHeight, tabWidth;
-    //private AppSettings settings;
+    private Container playerNumberButtons;
+    private Container gameModeButtons;
+
 
 
     @Override
@@ -47,99 +48,12 @@ public class MenuState extends AbstractAppState {
 
         windowHeight = cam.getHeight();
         windowWidth = cam.getWidth();
-
         tabWidth = windowWidth/6;
         tabHeight = windowHeight/3;
 
-
-
-        GuiGlobals.initialize(app);
-        BaseStyles.loadGlassStyle();
-
-
-
-
-
-
-
-
-
-
-        // Set 'glass' as the default style when not specified
-        GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
-
-        QuadBackgroundComponent sth= new QuadBackgroundComponent();
-        sth.setTexture(assetManager.loadTexture("Textures/Textures/Sand.jpg"));
-        //sth.setColor(ColorRGBA.Red);
-
-
-        //startScreen.setPreferredSize();
-
-        // Create a simple container for our elements
-        Container myWindow = new Container();
-        myWindow.setBackground(sth);
-        myWindow.setPreferredSize(new Vector3f(windowWidth,windowHeight,0.0f));
-        guiNode.attachChild(myWindow);
-        myWindow.setLocalTranslation(0f, windowHeight, 0);
-
-
-
-
-        Container buttons = new Container();
-        buttons.setPreferredSize(new Vector3f(tabWidth,tabHeight,0.0f));
-        buttons.setLocalTranslation(windowWidth/2-tabWidth/2, windowHeight/2+tabHeight/2, 0);
-
-        guiNode.attachChild(buttons);
-
-        Button twoPlayers = buttons.addChild(new Button("Two Players"));
-        twoPlayers.setColor(ColorRGBA.Magenta);
-
-        Button threePlayers = buttons.addChild(new Button("Three Players"));
-        threePlayers.setColor(ColorRGBA.Green);
-
-        Button fourPlayers = buttons.addChild(new Button("Four Players"));
-        threePlayers.setColor(ColorRGBA.Green);
-
-
-
-        twoPlayers.addClickCommands(new Command<Button>() {
-            @Override
-            public void execute( Button source ) {
-                System.out.println("The world is yours.");
-                stateManager.cleanup();
-                ((Game) app).setPlayerNumber( 2);
-                stateManager.attach(((Game) app).initializationState);
-                stateManager.detach(((Game) app).menuState);
-            }
-        });
-
-
-        threePlayers.addClickCommands(new Command<Button>() {
-            @Override
-            public void execute( Button source ) {
-                System.out.println("The world is yours.");
-                ((Game) app).setPlayerNumber( 3);
-                stateManager.cleanup();
-                stateManager.attach(((Game) app).initializationState);
-                stateManager.detach(((Game) app).menuState);
-            }
-        });
-
-        fourPlayers.addClickCommands(new Command<Button>() {
-            @Override
-            public void execute( Button source ) {
-                System.out.println("The world is yours.");
-                ((Game) app).setPlayerNumber( 4);
-                stateManager.cleanup();
-                stateManager.attach(((Game) app).initializationState);
-                stateManager.detach(((Game) app).menuState);
-
-            }
-        });
-
-
-
-
+        createBackground();
+        createPlayerNumberButtons();
+        createGameModeButtons();
 
     }
 
@@ -150,7 +64,76 @@ public class MenuState extends AbstractAppState {
         guiNode.detachAllChildren();
 
     }
+    private void createBackground()
+    {
+        GuiGlobals.initialize(app);
+        BaseStyles.loadGlassStyle();
 
+        // Set 'glass' as the default style when not specified
+        GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
+        QuadBackgroundComponent background= new QuadBackgroundComponent();
+        background.setTexture(assetManager.loadTexture("Textures/Textures/Sand.jpg"));
+
+        // Create a simple container for our elements
+        Container myWindow = new Container();
+        myWindow.setBackground(background);
+        myWindow.setPreferredSize(new Vector3f(windowWidth,windowHeight,0.0f));
+        guiNode.attachChild(myWindow);
+        myWindow.setLocalTranslation(0f, windowHeight, 0);
+    }
+    private void createGameModeButtons()
+    {
+        gameModeButtons = new Container();
+        gameModeButtons.setPreferredSize(new Vector3f(tabWidth,tabHeight,0.0f));
+        gameModeButtons.setLocalTranslation(windowWidth/2-tabWidth/2, windowHeight/2+tabHeight/2, 0);
+
+        guiNode.attachChild(gameModeButtons);
+
+        Button hotSeat = gameModeButtons.addChild(new Button("Hot seat"));
+        hotSeat.setColor(ColorRGBA.Magenta);
+
+        Button online = gameModeButtons.addChild(new Button("Online"));
+        online.setColor(ColorRGBA.Green);
+
+        hotSeat.addClickCommands(new Command<Button>() {
+            @Override
+            public void execute( Button source ) {
+                switchToOtherContainer(gameModeButtons,playerNumberButtons);
+            }
+        });
+    }
+    private void switchToOtherContainer(Container previous,Container present)
+    {
+        guiNode.detachChild(previous);
+        guiNode.attachChild(present);
+    }
+    private void createPlayerNumberButtons()
+    {
+        playerNumberButtons = new Container();
+        playerNumberButtons.setPreferredSize(new Vector3f(tabWidth,tabHeight,0.0f));
+        playerNumberButtons.setLocalTranslation(windowWidth/2-tabWidth/2, windowHeight/2+tabHeight/2, 0);
+
+        createButton(2,playerNumberButtons);
+        createButton(3,playerNumberButtons);
+        createButton(4,playerNumberButtons);
+
+
+    }
+    private Button createButton(int numberOfPlayers,Container playerNumberButtons) {
+        Button newButton = playerNumberButtons.addChild(new Button(numberOfPlayers + " players"));
+        newButton.setColor(ColorRGBA.Green);
+        newButton.addClickCommands(new Command<Button>() {
+            @Override
+            public void execute(Button source) {
+                ((Game) app).setPlayerNumber(numberOfPlayers);
+                stateManager.cleanup();
+                stateManager.attach(((Game) app).initializationState);
+                stateManager.detach(((Game) app).menuState);
+
+            }
+        });
+        return newButton;
+    }
 
 
 }
