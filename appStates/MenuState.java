@@ -31,6 +31,7 @@ public class MenuState extends AbstractAppState {
     private float tabHeight, tabWidth;
     private Container playerNumberButtons;
     private Container gameModeButtons;
+    private Container myWindow;
 
 
 
@@ -75,7 +76,7 @@ public class MenuState extends AbstractAppState {
         background.setTexture(assetManager.loadTexture("Textures/Textures/Sand.jpg"));
 
         // Create a simple container for our elements
-        Container myWindow = new Container();
+        myWindow = new Container();
         myWindow.setBackground(background);
         myWindow.setPreferredSize(new Vector3f(windowWidth,windowHeight,0.0f));
         guiNode.attachChild(myWindow);
@@ -99,6 +100,15 @@ public class MenuState extends AbstractAppState {
             @Override
             public void execute( Button source ) {
                 switchToOtherContainer(gameModeButtons,playerNumberButtons);
+            }
+        });
+        online.addClickCommands(new Command<Button>() {
+            @Override
+            public void execute( Button source ) {
+                stateManager.cleanup();
+                guiNode.attachChild(myWindow);
+                stateManager.attach(new MultiPlayerLobbyState());
+                stateManager.detach(((Game) app).menuState);
             }
         });
     }
