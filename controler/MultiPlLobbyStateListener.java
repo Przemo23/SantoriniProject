@@ -14,9 +14,14 @@ public class MultiPlLobbyStateListener implements ActionListener
     public void onAction(String name, boolean keyPressed, float tpf)
     {
 
-        if(((name.charAt(0)>=48 && name.charAt(0)<=57 )|| name.equals(".")) && !keyPressed)
+        if(checkIfNumberOrPeriod(name) && !keyPressed)
             insertedIP +=name;
 
+    }
+
+    private boolean checkIfNumberOrPeriod(String name)
+    {
+        return ((name.charAt(0)>=48 && name.charAt(0)<=57 )|| name.equals("."));
     }
 
 }

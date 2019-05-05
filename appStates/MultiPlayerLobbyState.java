@@ -17,7 +17,9 @@ import com.simsilica.lemur.*;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
 import com.simsilica.lemur.style.BaseStyles;
 import controler.MultiPlLobbyStateListener;
+import Multiplayer.*;
 
+import java.io.IOException;
 
 
 public class MultiPlayerLobbyState extends AbstractAppState {
@@ -141,11 +143,14 @@ public class MultiPlayerLobbyState extends AbstractAppState {
             @Override
             public void execute( Button source ) {
 
-            //Create server here
+                Server server = new Server(6666);
+                server.run();
+                // create a client here
             }
         });
 
     }
+
 
     private void createClearButton()
     {
@@ -169,7 +174,8 @@ public class MultiPlayerLobbyState extends AbstractAppState {
         connect.addClickCommands(new Command<Button>() {
             @Override
             public void execute( Button source ) {
-                //connect with existing server here
+                Client client = new Client(insertedIP, 6666);
+                client.sendMessage();
 
             }
         });
@@ -201,19 +207,16 @@ public class MultiPlayerLobbyState extends AbstractAppState {
 
     private void createTextFields()
     {
-
         QuadBackgroundComponent sth= new QuadBackgroundComponent();
         sth.setTexture(assetManager.loadTexture("Textures/Textures/CobbleRoad.jpg"));
         insertIPTextFields = new Container();
         insertIPTextFields.setPreferredSize(new Vector3f(tabWidth/2,tabHeight/6,0.0f));
-        insertIPTextFields.setLocalTranslation(windowWidth/2-tabWidth/2, windowHeight/2-tabHeight, 0);
+        insertIPTextFields.setLocalTranslation(windowWidth/2-tabWidth/2, 3*(windowHeight/2-tabHeight)+ tabHeight/6, 0);
         insertIPTextFields.setBackground(sth);
         prompt = insertIPTextFields.addChild(new TextField("Enter server's IP"));
         prompt.setColor(ColorRGBA.Orange);
         insertIP = insertIPTextFields.addChild(new TextField(insertedIP));
         insertIP.setColor(ColorRGBA.White);
-
-
     }
 
 
